@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欢迎访问</title>
+    <style>
+        /* 这里放你的样式，建议做成全屏居中的简洁感 */
+        body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f5f5f7; }
+        .card { background: white; padding: 2rem; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 300px; }
+        input { width: 80%; padding: 12px; margin: 20px 0; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; outline: none; }
+        button { background: #007aff; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-size: 16px; cursor: pointer; }
+        button:active { opacity: 0.8; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+    <h2>身份验证</h2>
+    
+    <div id="auth-area">
+        <p style="color: #666; font-size: 14px;">请输入卡密以解锁内容</p >
+        <input type="text" id="passInput" placeholder="请输入卡密">
+        <button onclick="validate()">验证卡密</button>
+        <p id="error" style="color: #ff3b30; font-size: 12px; margin-top: 10px;"></p >
+    </div>
+
+    <div id="choice-area" style="display: none;">
+        <p style="color: #28a745; font-weight: bold;">验证成功！请选择进入：</p >
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+            <button onclick="location.href='file:///C:/Users/Administrator/Desktop/%E7%BD%91%E9%A1%B5%E6%9D%A1%E5%BD%A2%E7%A0%81.html'" style="background: #5856d6;">进入 条形码</button>
+            <button onclick="location.href='file:///C:/Users/Administrator/Desktop/%E7%BD%91%E9%A1%B5.html'" style="background: #34c759;">进入 关于手机</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function validate() {
+        const code = document.getElementById('passInput').value;
+        const secretKey = "666888"; // 你的卡密
+
+        if (code === secretKey) {
+            // 隐藏验证区域，显示选择区域
+            sessionStorage.setItem('isAuthed', 'true');
+            document.getElementById('auth-area').style.display = 'none';
+            document.getElementById('choice-area').style.display = 'block';;
+        } else {
+            const errorEl = document.getElementById('error');
+            errorEl.innerText = "卡密无效，请重新输入";
+            // 简单的抖动效果提示错误
+            errorEl.style.transform = "translateX(10px)";
+            setTimeout(() => errorEl.style.transform = "translateX(0)", 100);
+        }
+    }
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>共享设备标识符</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+     <script>
+             // 如果没有验证标记，立刻强制跳回首页
+             if (sessionStorage.getItem('isAuthed') !== 'true') {
+            window.location.href = "index.html";
+               }
+       </script>
+
+    <style>
+        :root {
+            --status-text: #cacadb; 
+            --bg-overlay: #999999;
+            --card-bg: #ffffff;
+            --text-main: #000000;
+            --text-secondary: #8e8e93;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        html, body {
+            height: 100%;
+            background-color: var(--bg-overlay);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            overflow: hidden;
+        }
+
+        /* --- 顶栏状态栏 --- */
+        .status-bar {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 44px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 45px;
+            z-index: 100;
+            color: var(--status-text);
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .status-right { 
+            display: flex; 
+            align-items: flex-end; /* 强制所有图标底部对齐 */
+            gap: 6px; 
+            transform: scale(0.9); 
+            height: 20px; /* 固定高度方便对齐 */
+            padding-bottom: 4px;
+            margin-right: -15px; 
+        }
+        
+        /* 信号：改成4个小圆点 */
+        .signal { display: flex; gap: 3px; align-items: center; }
+        .signal span { 
+            width: 5.5px; 
+            height: 5.5px; 
+            background: var(--status-text); 
+            border-radius: 50%; 
+            opacity: 1 !important; 
+        }
+        .signal span:nth-child(4) { opacity: 0.3; } /* 最后一格信号较弱 */
+
+        /* Wi-Fi 样式：对齐底部 */
+        .wifi {
+            width: 22px;
+            height: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            position: relative;
+            margin-bottom: -3px; /* 像素级下移，确保弧线尖端与圆点水平线一致 */
+        }
+
+        .wifi span {
+            position: absolute;
+            border: 2.5px solid var(--status-text);
+            border-radius: 50%;
+            border-left-color: transparent;
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+        }
+
+        .wifi span:nth-child(1) { width: 22px; height: 22px; bottom: -8px; opacity: 0.35; }
+        .wifi span:nth-child(2) { width: 14px; height: 14px; bottom: -4px; }
+        .wifi span:nth-child(3) { width: 6px; height: 4px; bottom: 0px; }
+
+        /* 电池：位置微调 */
+        .battery {
+            width: 25px; height: 13.5px; border: 1px solid var(--status-text);
+            border-radius: 4px; position: relative; padding: 1px;
+            margin-bottom: -2px;
+        }
+        .battery-level { background: var(--status-text); height: 100%; width: 30%; border-radius: 3px; }
+        .battery-head {
+            position: absolute; right: -2px; top: 2.5px;
+            width: 1.2px; height: 4.5px; background: var(--status-text); border-radius: 0 1.5px 1.5px 0;
+        }
+
+        /* --- 弹窗主体 --- */
+        .modal {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 92%;
+            background: var(--card-bg);
+            border-radius: 45px 45px 0 0;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+        }
+
+        .close-btn {
+            width: 34px; height: 34px; background: #f1f1f2; border-radius: 50%;
+            margin: 20px 0 0 25px; display: flex; justify-content: center;
+            align-items: center; font-size: 18px; color: #000; font-weight: 300;
+        }
+
+        .content { padding: 25px 35px; }
+        .title { font-size: 24px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.5px; }
+        .subtitle { font-size: 17px; color: var(--text-secondary); margin-bottom: 45px; }
+
+        .barcode-group {
+            display: flex; flex-direction: column; align-items: center; gap: 55px;
+        }
+        .barcode-box { text-align: center; width: 100%; }
+        
+        .imei-text {
+            font-size: 17px; margin-bottom: 12px; display: flex; justify-content: center; gap: 6px;
+        }
+        .imei-input {
+            border: none; outline: none; font-size: 17px; font-family: inherit;
+            width: 160px; color: #333;
+        }
+
+        .barcode-svg { width: 80%; max-width: 300px; height: auto; }
+
+    </style>
+</head>
+<body>
+
+    <div class="status-bar">
+        <div contenteditable="true">14:34</div>
+        <div class="status-right">
+            <div class="signal">
+                <span></span><span></span><span></span><span></span>
+            </div>
+            <div class="wifi">
+                <span></span><span></span><span></span>
+            </div>
+            <div class="battery">
+                <div class="battery-level"></div>
+                <div class="battery-head"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal">
+        <div class="close-btn">✕</div>
+        <div class="content">
+            <h1 class="title">共享设备标识符</h1>
+            <p class="subtitle">你可以通过扫描条形码共享 IMEI。</p >
+
+            <div class="barcode-group">
+                <div class="barcode-box">
+                    <div class="imei-text">
+                        <span>IMEI</span>
+                        <input type="text" class="imei-input" id="in1" value="356426401398596" oninput="draw('in1','bc1')">
+                    </div>
+                    <svg id="bc1" class="barcode-svg"></svg>
+                </div>
+
+                <div class="barcode-box">
+                    <div class="imei-text">
+                        <span>IMEI2</span>
+                        <input type="text" class="imei-input" id="in2" value="356426401307811" oninput="draw('in2','bc2')">
+                    </div>
+                    <svg id="bc2" class="barcode-svg"></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function draw(inputId, svgId) {
+            const val = document.getElementById(inputId).value;
+            JsBarcode("#" + svgId, val, {
+                format: "CODE128",
+                displayValue: false,
+                fontSize: 0,
+                margin: 0,
+                width: 2.2,
+                height: 75,
+                lineColor: "#000"
+            });
+        }
+        window.onload = () => { draw('in1','bc1'); draw('in2','bc2'); };
+    </script>
+</body>
+</html>
