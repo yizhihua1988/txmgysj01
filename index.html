@@ -1,292 +1,221 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-	<head>
-		<meta charset="UTF-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-				<title>iOS 像素修改器 - 商业版</title>
-				<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-				<style>
-					body { font-family: -apple-system, system-ui, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; -webkit-user-select: none; user-select: none; }
-					.controls { width: 95%; max-width: 850px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 10px; }
-					.input-item { background: #f9f9f9; padding: 8px; border-radius: 8px; border: 1px solid #eee; display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
-					.input-item.active { border: 2px solid #007aff; background: #eef7ff; }
-					input[type="text"] { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; outline: none; }
-					.btn { border: none; padding: 10px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; color: white; transition: 0.2s; }
-					.btn-aim { background: #ff9500; }
-					.btn-aim.active-status { background: #ff3b30; }
-					.btn-lock { background: #34c759; display: none; }
-					.btn-reset { background: #ff3b30; width: 100%; margin-top: 10px; padding: 12px; }
-					.tools-bar { background: #333; color: white; padding: 12px; border-radius: 10px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; width: 95%; max-width: 850px; }
-					.tool-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-					.tool-group { display: flex; align-items: center; gap: 5px; font-size: 12px; flex: 1; }
-					input[type="range"] { flex: 1; accent-color: #007aff; }
-					.barcode-area { background: #fff3e0; border: 1px solid #ff9500; padding: 8px; border-radius: 10px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
-					.barcode-area.active { border: 2px solid #ff3b30; }
-					#float-joy { position: fixed; bottom: 20px; right: 20px; width: 160px; height: 160px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(0,0,0,0.1); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 9999; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px; touch-action: none; }
-					.joy-handle { grid-column: span 3; height: 22px; background: #ddd; border-radius: 11px; margin-bottom: 5px; cursor: move; display: flex; justify-content: center; align-items: center; font-size: 10px; color: #666; }
-					.joy-btn { width: 100%; height: 45px; background: #fff; border: 1px solid #ddd; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #007aff; font-weight: bold; }
-					#canvas-wrap { position: relative; display: inline-block; touch-action: none; margin-top: 10px; }
-					#canvas { border: 1px solid #ddd; border-radius: 8px; max-width: 100%; height: auto; background: #fff; margin-bottom: 220px; }
-					#saveBtn { background: #34c759; color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 18px; width: 90%; margin-bottom: 50px; }
-					#auth-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f0f2f5; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; }
-				</style>
-			</head>
-	<body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>一棵树</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        body { font-family: -apple-system, system-ui, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; -webkit-user-select: none; user-select: none; overflow-y: auto; overflow-x: hidden; min-height: 100vh; -webkit-overflow-scrolling: touch; }
+        .controls { width: 95%; max-width: 850px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 10px; }
+        .input-item { background: #f9f9f9; padding: 8px; border-radius: 8px; border: 1px solid #eee; display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+        .input-item.active { border: 2px solid #007aff; background: #eef7ff; }
+        input[type="text"] { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; outline: none; }
+        .btn { border: none; padding: 10px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; color: white; }
+        .btn-aim { background: #ff9500; }
+        .btn-aim.active-status { background: #ff3b30; }
+        .btn-lock { background: #34c759; display: none; }
+        .btn-reset { background: #ff3b30; width: 100%; margin-top: 10px; padding: 12px; }
+        #float-joy { position: fixed; bottom: 20px; right: 20px; width: 190px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(0,0,0,0.15); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 9999; padding: 12px; display: flex; flex-direction: column; gap: 10px; touch-action: none; }
+        .joy-handle { height: 26px; background: #f0f0f0; border-radius: 13px; cursor: move; display: flex; justify-content: center; align-items: center; font-size: 11px; color: #999; font-weight: bold; }
+        .joy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .joy-btn { height: 44px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #007aff; }
+        .joy-slider-box { padding: 4px 0; border-top: 1px solid #f0f0f0; }
+        .joy-label { font-size: 10px; color: #666; margin-bottom: 4px; display: block; text-align: left; font-weight: bold;}
+        input[type="range"] { width: 100%; accent-color: #007aff; margin: 2px 0; height: 20px; }
+        #canvas { border: 1px solid #ddd; border-radius: 8px; max-width: 100%; height: auto; background: #fff; margin-bottom: 450px; }
+        #saveBtn { background: #34c759; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 18px; width: 90%; margin-bottom: 60px; }
+        #auth-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f0f2f5; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; }
+    </style>
+</head>
+<body>
 
-		<div id="auth-overlay">
-			<div style="background:white; padding:30px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1); width:100%; max-width:350px; text-align:center;">
-				<h2 style="margin:0 0 10px; color:#333;">系统已锁定</h2>
-				<p style="font-size:14px; color:#666; margin-bottom:20px;">请输入有效卡密以解锁功能</p>
-				<input type="text" id="key-input" placeholder="输入激活卡密" style="width:100%; padding:15px; border:2px solid #ddd; border-radius:10px; font-size:16px; margin-bottom:15px; outline:none; box-sizing:border-box;">
-					<button onclick="checkKey()" id="auth-btn" style="width:100%; background:#007aff; color:white; border:none; padding:15px; border-radius:10px; font-size:16px; font-weight:bold; cursor:pointer;">立即激活</button>
-					<p id="dev-id-display" style="margin-top:15px; font-size:10px; color:#bbb;"></p>
-				</div>
-		</div>
+<div id="auth-overlay">
+    <div style="background:white; padding:30px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1); width:100%; max-width:350px; text-align:center;">
+        <h2 style="margin:0 0 10px; color:#333;">一棵树</h2>
+        <p style="font-size:12px; color:#999; margin-bottom:20px;">通行证验证</p>
+        <input type="text" id="key-input" placeholder="输入通行证" style="width:100%; padding:15px; border:2px solid #ddd; border-radius:10px; font-size:16px; margin-bottom:15px; outline:none; box-sizing:border-box;">
+        <button onclick="_0x5a12()" style="width:100%; background:#007aff; color:white; border:none; padding:15px; border-radius:10px; font-size:16px; font-weight:bold; cursor:pointer;">进入系统</button>
+        <p id="dev-id-display" style="margin-top:15px; font-size:9px; color:#ccc;"></p>
+    </div>
+</div>
 
-		<div class="controls">
-			<input type="file" id="u" accept="image/*" style="width:100%; margin-bottom:10px;">
-				<div class="tools-bar">
-					<div class="tool-row">
-						<div class="tool-group">
-							<label>字号:</label>
-							<input type="range" id="indepSize" min="10" max="180" value="40" oninput="updateActiveParams()">
-						</div>
-						<div class="tool-group" style="flex:0.4">
-							<select id="indepWeight" onchange="updateActiveParams()">
-								<option value="400">400</option>
-								<option value="400">470</option>
-								<option value="500" selected="">500</option>
-								<option value="600">600</option>
-								<option value="700">700</option>
-							</select>
-						</div>
-						<div class="tool-group" style="flex:0.2">
-							<input type="color" id="indepColor" value="#8E8E93" oninput="updateActiveParams()">
-						</div>
-					</div>
-					<div class="tool-row" id="barcode-only-tools" style="display:none;">
-						<div class="tool-group">
-							<label style="color:#ff9500">条码密度:</label>
-							<input type="range" id="indepBarWidth" min="0.5" max="8" step="0.1" value="3" oninput="updateActiveParams()">
-						</div>
-					</div>
-					<button class="btn btn-reset" onclick="resetAll()">⚠️ 一键还原初始状态</button>
-				</div>
-				<div class="barcode-area" id="bar-box-B1">
-					<label>📊条码1</label>
-					<input type="text" id="newBarcode1" placeholder="输入条码数字" oninput="renderAll()">
-						<button class="btn btn-aim" id="aimB1" onclick="startAim('B1')">瞄准</button>
-						<button class="btn btn-lock" id="lockB1" onclick="lockItem()">确定</button>
-				</div>
-				<div class="barcode-area" id="bar-box-B2">
-					<label>📊条码2</label>
-					<input type="text" id="newBarcode2" placeholder="输入条码数字" oninput="renderAll()">
-						<button class="btn btn-aim" id="aimB2" onclick="startAim('B2')">瞄准</button>
-						<button class="btn btn-lock" id="lockB2" onclick="lockItem()">确定</button>
-				</div>
-				<div id="inputs-area"></div>
-			</div>
+<div class="controls">
+    <input type="file" id="u" accept="image/*" style="width:100%; margin-bottom:12px;">
+    <button class="btn btn-reset" onclick="resetAll()">⚠️ 清空并重置</button>
+    <div class="barcode-area" id="bar-box-B1"><label>📊 模块A</label><input type="text" id="newBarcode1" oninput="renderAll()"><button class="btn btn-aim" id="aimB1" onclick="startAim('B1')">定位</button><button class="btn btn-lock" id="lockB1" onclick="lockItem()">确认</button></div>
+    <div class="barcode-area" id="bar-box-B2"><label>📊 模块B</label><input type="text" id="newBarcode2" oninput="renderAll()"><button class="btn btn-aim" id="aimB2" onclick="startAim('B2')">定位</button><button class="btn btn-lock" id="lockB2" onclick="lockItem()">确认</button></div>
+    <div id="inputs-area"></div>
+</div>
 
-		<div id="canvas-wrap">
-			<canvas id="canvas"></canvas>
-		</div>
-		<canvas id="tempCanvas" style="display:none;"></canvas>
+<div id="canvas-wrap"><canvas id="canvas"></canvas></div>
+<canvas id="tempCanvas" style="display:none;"></canvas>
 
-		<div id="float-joy">
-			<div class="joy-handle" id="joy-handle">⠿ 拖动面板 ⠿</div>
-			<div></div>
-			<div class="joy-btn" onmousedown="startMove('up')" onmouseup="stopMove()" ontouchstart="startMove('up')" ontouchend="stopMove()">↑</div>
-			<div></div>
-			<div class="joy-btn" onmousedown="startMove('left')" onmouseup="stopMove()" ontouchstart="startMove('left')" ontouchend="stopMove()">←</div>
-			<div class="joy-btn" onmousedown="startMove('down')" onmouseup="stopMove()" ontouchstart="startMove('down')" ontouchend="stopMove()">↓</div>
-			<div class="joy-btn" onmousedown="startMove('right')" onmouseup="stopMove()" ontouchstart="startMove('right')" ontouchend="stopMove()">→</div>
-		</div>
+<div id="float-joy">
+    <div class="joy-handle" id="joy-handle">⠿ 只能修图</div>
+    <div class="joy-slider-box"><span class="joy-label">字号/高度: <b id="sizeVal">40</b>px</span><input type="range" id="floatSize" min="10" max="200" value="40" oninput="_0x2b11(this.value)"></div>
+    <div class="joy-slider-box" id="densityBox" style="display:none; border-top:1px dashed #eee;"><span class="joy-label" style="color:#ff9500">渲染密度: <b id="denVal">3.0</b></span><input type="range" id="floatDensity" min="0.5" max="8" step="0.1" value="3" oninput="_0x3c22(this.value)"></div>
+    <div class="joy-grid">
+        <div class="joy-btn" style="background:#f9f9f9;font-size:11px;color:#333">粗细<br><select id="floatWeight" style="width:100%;border:none;background:transparent;font-size:10px" onchange="updateActiveParams()"><option value="400">400</option><option value="470">470</option><option value="500" selected>500</option><option value="700">700</option></select></div>
+        <div class="joy-btn" onmousedown="_0x1e33('up')" ontouchstart="_0x1e33('up')">↑</div>
+        <div class="joy-btn" style="background:#f9f9f9;font-size:11px;color:#333">颜色<br><input type="color" id="floatColor" value="#8E8E93" style="width:80%;height:16px;border:none" oninput="updateActiveParams()"></div>
+        <div class="joy-btn" onmousedown="_0x1e33('left')" ontouchstart="_0x1e33('left')">←</div>
+        <div class="joy-btn" onmousedown="_0x1e33('down')" ontouchstart="_0x1e33('down')">↓</div>
+        <div class="joy-btn" onmousedown="_0x1e33('right')" ontouchstart="_0x1e33('right')">→</div>
+    </div>
+</div>
 
-		<button id="saveBtn" onclick="download()">保存图片到相册</button>
+<button id="saveBtn" onclick="download()">保存修图结果</button>
 
-		<script>
-			const cvs = document.getElementById('canvas'), ctx = cvs.getContext('2d', { willReadFrequently: true });
-			let baseImg = null, activeIdx = null, modifiedItems = {}, isPointerDown = false, moveTimer = null, fastTimer = null;
+<script>
+    const _0x7a2 = {"RG1tMTEyMjEx": 0x1, "KioqKioqKio=": 0x7, "RE1NMTEyMjExLi4u": 0x1e, "RG1NMjIxMTIyLi4=": 0x16d};
+    const _0x9b3 = "RESET_ALL_LOCKS";
+    const _0xc1 = document.getElementById('canvas'), _0xd2 = _0xc1.getContext('2d', { willReadFrequently: true });
+    let _0xe3 = null, _0xf4 = null, _0xa5 = {}, _0xb6 = false, _0xc7 = null, _0xd8 = null;
 
-			// --- 🔐 授权配置 (卡密 -> 天数) ---
-			const KEY_CONFIG = { "RG1tMTEyMjEx": 7, "KioqKioqKio=": 7, "RE1NMTEyMjExLi4u": 7, "RG1NMjIxMTIyLi4=": 7 };
-
-			function getDeviceID() {
-			const info = [navigator.userAgent, screen.height, screen.width, navigator.language].join('|');
-			let hash = 0; for (let i = 0; i < info.length; i++) { hash = (hash << 5) - hash + info.charCodeAt(i); hash |= 0; }
-        return "DEV-" + Math.abs(hash);
+    function _0x1a9() {
+        const i = [navigator.userAgent, screen.height, screen.width, navigator.language].join('|');
+        let h = 0; for (let j = 0; j < i.length; j++) { h = (h << 5) - h + i.charCodeAt(j); h |= 0; }
+        return "T-ID-" + Math.abs(h);
     }
 
-    async function getNetworkTime() {
-        try {
-            const res = await fetch('https://api.m.suning.com/showtime.do');
-            const data = await res.json(); return parseInt(data.sysTime);
-        } catch (e) { return new Date().getTime(); } // 联网失败回退到本地，上线请改回null
+    async function _0x2b8() {
+        try { const r = await fetch('https://api.m.suning.com/showtime.do'); const d = await r.json(); return parseInt(d.sysTime); } catch (e) { return new Date().getTime(); }
     }
 
-    async function checkKey() {
-        const input = document.getElementById('key-input').value.trim();
-        if (!input) return alert("请输入卡密！");
-        
-        // 🛠️ 超级重置暗号
-        if (input === "RESET_ALL_LOCKS") {
-            if(confirm("确定清空所有绑定吗？")) { localStorage.clear(); location.reload(); }
-            return;
+    async function _0x5a12() {
+        const v = document.getElementById('key-input').value.trim();
+        if (v === _0x9b3) { if(confirm("确定重置？")) { localStorage.clear(); location.reload(); } return; }
+        const e = btoa(v), d = _0x1a9(), n = await _0x2b8();
+        if (_0x7a2.hasOwnProperty(e)) {
+            const b = localStorage.getItem('bind_id_' + e);
+            if (b && b !== d) { alert("设备冲突"); return; }
+            let s = JSON.parse(localStorage.getItem('bind_data_' + e));
+            if (!s) { s = { st: n, dy: _0x7a2[e] }; localStorage.setItem('bind_id_' + e, d); localStorage.setItem('bind_data_' + e, JSON.stringify(s)); }
+            if ((n - s.st) / 864e5 > s.dy) { alert("已到期"); return; }
+            document.getElementById('auth-overlay').style.display = 'none'; localStorage.setItem('u_auth', e); _0x3c7();
+        } else { alert("无效"); }
+    }
+
+    function _0x3c7() {
+        const w = localStorage.getItem('saved_work'), t = localStorage.getItem('saved_inputs');
+        if (w) _0xa5 = JSON.parse(w);
+        if (t) { const d = JSON.parse(t); for (let k in d) { const el = document.getElementById(k); if (el) el.value = d[k]; } }
+        if (_0xe3) renderAll();
+    }
+
+    function _0x4d6() {
+        if (Object.keys(_0xa5).length > 0) {
+            localStorage.setItem('saved_work', JSON.stringify(_0xa5));
+            const d = {}; document.querySelectorAll('input[type="text"]').forEach(i => d[i.id] = i.value);
+            localStorage.setItem('saved_inputs', JSON.stringify(d));
         }
+    }
 
-        const encoded = btoa(input), dev = getDeviceID(), now = await getNetworkTime();
-        if (!now) return alert("🌐 请联网校验北京时间！");
+    window.addEventListener('DOMContentLoaded', async () => {
+        document.getElementById('dev-id-display').innerText = "ID: " + _0x1a9();
+        const a = localStorage.getItem('u_auth'), n = await _0x2b8();
+        if (a && _0x7a2[a] && n) {
+            const d = JSON.parse(localStorage.getItem('bind_data_' + a));
+            if (localStorage.getItem('bind_id_' + a) === _0x1a9() && (n - d.st) / 864e5 <= d.dy) {
+                document.getElementById('auth-overlay').style.display = 'none'; _0x3c7();
+            }
+        }
+    });
 
-        if (KEY_CONFIG.hasOwnProperty(encoded)) {
-            const bound = localStorage.getItem('bind_id_' + encoded);
-            if (bound && bound !== dev) return alert("❌ 此卡密已绑定其他设备！\nID: " + dev);
+    const ar = document.getElementById('inputs-area');
+    for(let i=1; i<=6; i++) {
+        ar.innerHTML += `<div class="input-item" id="box${i}"><input type="text" id="old${i}" placeholder="参考"><input type="text" id="new${i}" placeholder="修改" oninput="renderAll()"><button class="btn btn-aim" id="aim${i}" onclick="startAim(${i})">瞄准</button><button class="btn btn-lock" id="lock${i}" onclick="lockItem()">确认</button></div>`;
+    }
 
-			let data = JSON.parse(localStorage.getItem('bind_data_' + encoded));
-			if (!data) {
-			data = { startTime: now, days: KEY_CONFIG[encoded] };
-			localStorage.setItem('bind_id_' + encoded, dev);
-			localStorage.setItem('bind_data_' + encoded, JSON.stringify(data));
-			}
+    const jy = document.getElementById('float-joy'), hd = document.getElementById('joy-handle');
+    let isD = false, of = { x: 0, y: 0 };
+    hd.onpointerdown = (e) => { isD = true; of.x = e.clientX - jy.offsetLeft; of.y = e.clientY - jy.offsetTop; hd.setPointerCapture(e.pointerId); e.preventDefault(); };
+    hd.onpointermove = (e) => { if (isD) { jy.style.left = Math.max(0, Math.min(window.innerWidth-190, e.clientX-of.x))+'px'; jy.style.top = Math.max(0, Math.min(window.innerHeight-300, e.clientY-of.y))+'px'; jy.style.bottom='auto'; jy.style.right='auto'; }};
+    hd.onpointerup = () => isD = false;
 
-			if ((now - data.startTime) / 864e5 > data.days) { alert("🚫 授权已过期！"); return; }
+    _0xc1.onpointerdown = (e) => { if (_0xf4 === null) return; _0xb6 = true; _0x1f9(e); _0xc1.setPointerCapture(e.pointerId); };
+    _0xc1.onpointermove = (e) => { if (_0xb6) _0x1f9(e); };
+    _0xc1.onpointerup = () => { _0xb6 = false; renderAll(); };
 
-			alert("✅ 验证通过！");
-			document.getElementById('auth-overlay').style.display = 'none';
-			localStorage.setItem('u_auth', encoded);
-			loadProgress(); // 进入后加载存档
-			} else { alert("❌ 卡密错误！"); }
-			}
+    function _0x1f9(e) {
+        const r = _0xc1.getBoundingClientRect(), sx = _0xc1.width/r.width, sy = _0xc1.height/r.height;
+        if (!_0xa5[_0xf4]) _0xa5[_0xf4] = { sz: parseInt(document.getElementById('floatSize').value), wt: document.getElementById('floatWeight').value, cl: document.getElementById('floatColor').value, bw: parseFloat(document.getElementById('floatDensity').value) };
+        _0xa5[_0xf4].x = (e.clientX-r.left)*sx; _0xa5[_0xf4].y = (e.clientY-r.top)*sy;
+        renderAll();
+    }
 
-			// 💾 进度存档与加载
-			function saveProgress() {
-			if (Object.keys(modifiedItems).length > 0) {
-			localStorage.setItem('saved_work', JSON.stringify(modifiedItems));
-			const inputs = {};
-			document.querySelectorAll('input[type="text"]').forEach(i => inputs[i.id] = i.value);
-			localStorage.setItem('saved_inputs', JSON.stringify(inputs));
-			}
-			}
+    document.getElementById('u').onchange = (e) => {
+        const r = new FileReader(); r.onload = (ev) => { _0xe3 = new Image(); _0xe3.onload = () => { _0xc1.width = _0xe3.width; _0xc1.height = _0xe3.height; renderAll(); }; _0xe3.src = ev.target.result; }; r.readAsDataURL(e.target.files[0]);
+    };
 
-			function loadProgress() {
-			const work = localStorage.getItem('saved_work');
-			const inputs = localStorage.getItem('saved_inputs');
-			if (work) modifiedItems = JSON.parse(work);
-			if (inputs) {
-			const data = JSON.parse(inputs);
-			for (let id in data) { const el = document.getElementById(id); if (el) el.value = data[id]; }
-			}
-			}
+    function startAim(idx) {
+        _0xf4 = idx; document.querySelectorAll('.input-item, .barcode-area').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.btn-aim').forEach(btn => btn.classList.remove('active-status'));
+        document.querySelectorAll('.btn-lock').forEach(btn => btn.style.display = 'none');
+        const isB = String(idx).startsWith('B');
+        const box = isB ? document.getElementById('bar-box-'+idx) : document.getElementById('box'+idx);
+        document.getElementById('aim'+idx).classList.add('active-status'); document.getElementById('lock'+idx).style.display = 'inline-block';
+        box.classList.add('active'); document.getElementById('densityBox').style.display = isB ? 'block' : 'none';
+        if (_0xa5[idx]) {
+            document.getElementById('floatSize').value = _0xa5[idx].sz; document.getElementById('sizeVal').innerText = _0xa5[idx].sz;
+            document.getElementById('floatWeight').value = _0xa5[idx].wt; document.getElementById('floatColor').value = _0xa5[idx].cl;
+            if(isB) { document.getElementById('floatDensity').value = _0xa5[idx].bw; document.getElementById('denVal').innerText = _0xa5[idx].bw; }
+        }
+        renderAll();
+    }
 
-			window.addEventListener('DOMContentLoaded', async () => {
-			document.getElementById('dev-id-display').innerText = "设备ID: " + getDeviceID();
-			const saved = localStorage.getItem('u_auth'), now = await getNetworkTime();
-			if (saved && KEY_CONFIG[saved] && now) {
-			const data = JSON.parse(localStorage.getItem('bind_data_' + saved));
-			if (localStorage.getItem('bind_id_' + saved) === getDeviceID() && (now - data.startTime) / 864e5 <= data.days) {
-			document.getElementById('auth-overlay').style.display = 'none';
-			loadProgress();
-			}
-			}
-			});
+    function lockItem() { _0xf4 = null; document.querySelectorAll('.input-item, .barcode-area').forEach(el => el.classList.remove('active')); document.querySelectorAll('.btn-aim').forEach(btn => btn.classList.remove('active-status')); document.querySelectorAll('.btn-lock').forEach(btn => btn.style.display = 'none'); document.getElementById('densityBox').style.display = 'none'; _0x4d6(); renderAll(); }
 
-			// --- 🏗️ 核心逻辑 ---
-			const area = document.getElementById('inputs-area');
-			for(let i=1; i<=6; i++) {
-			area.innerHTML += `<div class="input-item" id="box${i}">
-				<input type="text" id="old${i}" placeholder="旧内容">
-					<input type="text" id="new${i}" placeholder="新内容" oninput="renderAll()">
-						<button class="btn btn-aim" id="aim${i}" onclick="startAim(${i})">瞄准</button>
-						<button class="btn btn-lock" id="lock${i}" onclick="lockItem()">确定</button>
-			</div>`;
-			}
+    function updateActiveParams() { if (_0xf4 && _0xa5[_0xf4]) {
+        _0xa5[_0xf4].sz = parseInt(document.getElementById('floatSize').value); _0xa5[_0xf4].wt = document.getElementById('floatWeight').value;
+        _0xa5[_0xf4].cl = document.getElementById('floatColor').value;
+        if (String(_0xf4).startsWith('B')) _0xa5[_0xf4].bw = parseFloat(document.getElementById('floatDensity').value);
+        renderAll();
+    }}
 
-			const joy = document.getElementById('float-joy'), handle = document.getElementById('joy-handle');
-			let isJoyD = false, joyOff = { x: 0, y: 0 };
-			handle.onpointerdown = (e) => { isJoyD = true; joyOff.x = e.clientX - joy.offsetLeft; joyOff.y = e.clientY - joy.offsetTop; handle.setPointerCapture(e.pointerId); e.preventDefault(); };
-			handle.onpointermove = (e) => { if (isJoyD) {
-			joy.style.left = Math.max(0, Math.min(window.innerWidth-160, e.clientX - joyOff.x)) + 'px';
-			joy.style.top = Math.max(0, Math.min(window.innerHeight-160, e.clientY - joyOff.y)) + 'px';
-			joy.style.bottom = 'auto'; joy.style.right = 'auto';
-			}};
-			handle.onpointerup = () => isJoyD = false;
+    function _0x2b11(v) { document.getElementById('sizeVal').innerText = v; updateActiveParams(); }
+    function _0x3c22(v) { document.getElementById('denVal').innerText = v; updateActiveParams(); }
 
-			cvs.onpointerdown = (e) => { if (activeIdx === null) return; isPointerDown = true; updatePos(e); cvs.setPointerCapture(e.pointerId); };
-			cvs.onpointermove = (e) => { if (isPointerDown) updatePos(e); };
-			cvs.onpointerup = () => { isPointerDown = false; renderAll(); };
-
-			function updatePos(e) {
-			const r = cvs.getBoundingClientRect(), sx = cvs.width / r.width, sy = cvs.height / r.height;
-			if (!modifiedItems[activeIdx]) modifiedItems[activeIdx] = { size: parseInt(document.getElementById('indepSize').value), weight: document.getElementById('indepWeight').value, color: document.getElementById('indepColor').value, barW: 3 };
-			modifiedItems[activeIdx].x = (e.clientX - r.left) * sx; modifiedItems[activeIdx].y = (e.clientY - r.top) * sy;
-			renderAll();
-			}
-
-			document.getElementById('u').onchange = (e) => {
-			const r = new FileReader(); r.onload = (ev) => { baseImg = new Image(); baseImg.onload = () => { cvs.width = baseImg.width; cvs.height = baseImg.height; renderAll(); }; baseImg.src = ev.target.result; }; r.readAsDataURL(e.target.files[0]);
-			};
-
-			function startAim(idx) {
-			activeIdx = idx; document.querySelectorAll('.input-item, .barcode-area').forEach(el => el.classList.remove('active'));
-			document.querySelectorAll('.btn-aim').forEach(btn => btn.classList.remove('active-status'));
-			document.querySelectorAll('.btn-lock').forEach(btn => btn.style.display = 'none');
-			const box = String(idx).startsWith('B') ? document.getElementById('bar-box-'+idx) : document.getElementById('box'+idx);
-			document.getElementById('aim'+idx).classList.add('active-status'); document.getElementById('lock'+idx).style.display = 'inline-block';
-			box.classList.add('active'); document.getElementById('barcode-only-tools').style.display = String(idx).startsWith('B') ? 'flex' : 'none';
-			if (modifiedItems[idx]) { document.getElementById('indepSize').value = modifiedItems[idx].size; document.getElementById('indepWeight').value = modifiedItems[idx].weight; document.getElementById('indepColor').value = modifiedItems[idx].color; }
-			renderAll();
-			}
-
-			function lockItem() {
-			activeIdx = null; lockItemUI(); saveProgress(); renderAll();
-			}
-
-			function lockItemUI() {
-			document.querySelectorAll('.input-item, .barcode-area').forEach(el => el.classList.remove('active'));
-			document.querySelectorAll('.btn-aim').forEach(btn => btn.classList.remove('active-status'));
-			document.querySelectorAll('.btn-lock').forEach(btn => btn.style.display = 'none');
-			}
-
-			function updateActiveParams() { if (activeIdx && modifiedItems[activeIdx]) {
-			modifiedItems[activeIdx].size = parseInt(document.getElementById('indepSize').value); modifiedItems[activeIdx].weight = document.getElementById('indepWeight').value;
-			modifiedItems[activeIdx].color = document.getElementById('indepColor').value; if (String(activeIdx).startsWith('B')) modifiedItems[activeIdx].barW = parseFloat(document.getElementById('indepBarWidth').value);
-			renderAll();
-			}}
-
-			function renderAll() {
-			if (!baseImg) return; ctx.drawImage(baseImg, 0, 0);
-			for (let k in modifiedItems) {
-			const itm = modifiedItems[k];
-			if (String(k).startsWith('B')) {
-			const val = document.getElementById(k==='B1'?'newBarcode1':'newBarcode2').value; if (!val) continue;
-			const tC = document.getElementById('tempCanvas');
-			try {
-			JsBarcode(tC, val, { format: "CODE128", lineColor: itm.color, displayValue: false, width: itm.barW, height: itm.size });
-			const p = ctx.getImageData(itm.x, Math.max(0, itm.y - itm.size*0.8 - 5), 1, 1).data;
-			ctx.fillStyle = (p[0]+p[1]+p[2] < 120) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`;
-                    ctx.fillRect(cvs.width*0.05, itm.y - itm.size*0.9, cvs.width*0.9, itm.size*1.8);
-                    ctx.drawImage(tC, cvs.width/2 - tC.width/2, itm.y - tC.height/2);
+    function renderAll() {
+        if (!_0xe3) return; _0xd2.drawImage(_0xe3, 0, 0);
+        for (let k in _0xa5) {
+            const i = _0xa5[k];
+            if (String(k).startsWith('B')) {
+                const v = document.getElementById(k==='B1'?'newBarcode1':'newBarcode2').value; if (!v) continue;
+                const t = document.getElementById('tempCanvas');
+                try {
+                    JsBarcode(t, v, { format: "CODE128", lineColor: i.cl, displayValue: false, width: i.bw, height: i.sz });
+                    const p = _0xd2.getImageData(i.x, Math.max(0, i.y-i.sz*0.8-5), 1, 1).data;
+                    _0xd2.fillStyle = (p[0]+p[1]+p[2] < 120) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`;
+                    _0xd2.fillRect(_0xc1.width*0.05, i.y-i.sz*0.9, _0xc1.width*0.9, i.sz*1.8);
+                    _0xd2.drawImage(t, _0xc1.width/2-t.width/2, i.y-t.height/2);
                 } catch(e){}
             } else {
-                const oldV = document.getElementById('old'+k).value, newV = document.getElementById('new'+k).value; if (!newV) continue;
-                const isR = itm.x > cvs.width/2; ctx.font = `${itm.weight} ${itm.size}px sans-serif`; ctx.textBaseline = "middle";
-                const tw = ctx.measureText(oldV || newV).width * 1.3 + 10;
-                const p = ctx.getImageData(itm.x - (isR?10:0), itm.y - itm.size/2 - 2, 1, 1).data;
-                ctx.fillStyle = (p[0]+p[1]+p[2] < 80) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`;
-                ctx.fillRect(isR?itm.x-tw+5:itm.x-tw/2, itm.y-itm.size*0.7, tw, itm.size*1.4);
-                ctx.fillStyle = itm.color; ctx.textAlign = isR ? "right" : "center"; ctx.fillText(newV, itm.x, itm.y);
+                const o = document.getElementById('old'+k).value, n = document.getElementById('new'+k).value; if (!n) continue;
+                const r = i.x > _0xc1.width/2; _0xd2.font = `${i.wt} ${i.sz}px sans-serif`; _0xd2.textBaseline = "middle";
+                const tw = _0xd2.measureText(o || n).width * 1.3 + 10;
+                const p = _0xd2.getImageData(i.x-(r?10:0), i.y-i.sz/2-2, 1, 1).data;
+                _0xd2.fillStyle = (p[0]+p[1]+p[2] < 80) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`;
+                _0xd2.fillRect(r?i.x-tw+5:i.x-tw/2, i.y-i.sz*0.7, tw, i.sz*1.4);
+                _0xd2.fillStyle = i.cl; _0xd2.textAlign = r ? "right" : "center"; _0xd2.fillText(n, i.x, i.y);
             }
-            if (k == activeIdx && isPointerDown) { ctx.strokeStyle = "rgba(255,0,0,0.6)"; ctx.setLineDash([5, 5]); ctx.strokeRect(cvs.width*0.05, itm.y-itm.size*0.8, cvs.width*0.9, itm.size*1.6); ctx.setLineDash([]); }
-			}
-			}
+            if (k == _0xf4 && _0xb6) { _0xd2.strokeStyle = "rgba(255,0,0,0.6)"; _0xd2.setLineDash([5, 5]); _0xd2.strokeRect(_0xc1.width*0.05, i.y-i.sz*0.8, _0xc1.width*0.9, i.sz*1.6); _0xd2.setLineDash([]); }
+        }
+    }
 
-			function move(d) { if (activeIdx && modifiedItems[activeIdx]) {
-			if(d==='up') modifiedItems[activeIdx].y-=1; if(d==='down') modifiedItems[activeIdx].y+=1;
-			if(d==='left') modifiedItems[activeIdx].x-=1; if(d==='right') modifiedItems[activeIdx].x+=1; renderAll();
-			}}
-			function startMove(d) { move(d); moveTimer = setTimeout(() => { fastTimer = setInterval(() => move(d), 40); }, 300); }
-			function stopMove() { clearTimeout(moveTimer); clearInterval(fastTimer); }
-			function resetAll() { if (confirm("确定清空所有存档并重置吗？")) { localStorage.removeItem('saved_work'); localStorage.removeItem('saved_inputs'); location.reload(); } }
-			function download() { activeIdx = null; renderAll(); const a = document.createElement('a'); a.download = 'ios_final.png'; a.href = cvs.toDataURL(); a.click(); }
-		</script>
-	</body>
+    function _0x1e33(d) {
+        if (_0xf4 && _0xa5[_0xf4]) {
+            if(d==='up') _0xa5[_0xf4].y-=1; if(d==='down') _0xa5[_0xf4].y+=1;
+            if(d==='left') _0xa5[_0xf4].x-=1; if(d==='right') _0xa5[_0xf4].x+=1; renderAll();
+        }
+    }
+    function startMove(d) { _0x1e33(d); _0xc7 = setTimeout(() => { _0xd8 = setInterval(() => _0x1e33(d), 45); }, 300); }
+    function stopMove() { clearTimeout(_0xc7); clearInterval(_0xd8); }
+    document.querySelectorAll('.joy-btn').forEach(b => { b.addEventListener('mouseup', stopMove); b.addEventListener('touchend', stopMove); });
+
+    function resetAll() { if (confirm("确定重置？")) { localStorage.clear(); location.reload(); } }
+    function download() { _0xf4 = null; renderAll(); const a = document.createElement('a'); a.download = 'result.png'; a.href = _0xc1.toDataURL(); a.click(); }
+</script>
+</body>
 </html>
