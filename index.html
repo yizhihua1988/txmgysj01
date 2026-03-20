@@ -8,31 +8,25 @@
     <style>
         body { font-family: -apple-system, system-ui, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; -webkit-user-select: none; user-select: none; overflow-y: auto; overflow-x: hidden; min-height: 100vh; -webkit-overflow-scrolling: touch; }
         .controls { width: 95%; max-width: 850px; background: white; padding: 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 10px; }
-        
-        /* ✨ 缩小后的输入项容器 */
         .input-item { background: #f9f9f9; padding: 4px 6px; border-radius: 6px; border: 1px solid #eee; display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
         .input-item.active { border: 1px solid #007aff; background: #eef7ff; }
-        
-        /* ✨ 关键修改：宽度变为原来的 4/5，且高度更扁平 */
         input[type="text"] { flex: 0.8; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; outline: none; min-width: 0; }
-        
         .btn { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; color: white; white-space: nowrap; }
         .btn-aim { background: #ff9500; }
         .btn-aim.active-status { background: #ff3b30; }
         .btn-lock { background: #34c759; display: none; }
         .btn-reset { background: #ff3b30; width: 100%; margin-top: 8px; padding: 10px; border-radius: 8px; }
-        
-        #float-joy { position: fixed; bottom: 20px; right: 20px; width: 190px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(0,0,0,0.15); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 9999; padding: 12px; display: flex; flex-direction: column; gap: 10px; touch-action: none; }
-        .joy-handle { height: 26px; background: #f0f0f0; border-radius: 13px; display: flex; justify-content: center; align-items: center; font-size: 11px; color: #999; font-weight: bold; }
+        #float-joy { position: fixed; bottom: 20px; right: 20px; width: 195px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(0,0,0,0.15); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 9999; padding: 12px; display: flex; flex-direction: column; gap: 8px; touch-action: none; }
+        .joy-handle { height: 26px; background: #f0f0f0; border-radius: 13px; display: flex; justify-content: center; align-items: center; font-size: 10px; color: #999; font-weight: bold; }
         .joy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-        .joy-btn { height: 44px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #007aff; }
-        .joy-slider-box { padding: 4px 0; border-top: 1px solid #f0f0f0; }
-        .joy-label { font-size: 10px; color: #666; margin-bottom: 4px; display: block; font-weight: bold;}
-        input[type="range"] { width: 100%; accent-color: #007aff; margin: 2px 0; height: 20px; }
-        
+        .joy-btn { height: 44px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #007aff; -webkit-tap-highlight-color: transparent; }
+        .joy-slider-box { padding: 2px 0; border-top: 1px solid #f0f0f0; }
+        .joy-label { font-size: 10px; color: #666; margin-bottom: 2px; display: block; font-weight: bold;}
+        input[type="range"] { width: 100%; accent-color: #007aff; margin: 2px 0; height: 18px; }
+        .quick-color { display: flex; gap: 5px; margin-top: 2px; }
+        .c-btn { width: 18px; height: 18px; border-radius: 4px; border: 1px solid #ddd; }
         .barcode-area { background: #fff3e0; border: 1px solid #ff9500; padding: 4px 6px; border-radius: 8px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
-        .barcode-area input { flex: 0.8; } /* 条码输入框同步缩小 */
-
+        .barcode-area input { flex: 0.8; }
         #canvas { border: 1px solid #ddd; border-radius: 8px; max-width: 100%; height: auto; background: #fff; margin-bottom: 450px; }
         #saveBtn { background: #34c759; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 18px; width: 90%; margin-bottom: 60px; }
         #auth-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f0f2f5; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; }
@@ -53,7 +47,6 @@
 <div class="controls">
     <input type="file" id="u" accept="image/*" style="width:100%; margin-bottom:12px;">
     <button class="btn btn-reset" onclick="resetAll()">⚠️ 清空并重置</button>
-    <div style="margin:8px 0;"></div>
     <div class="barcode-area" id="bar-box-B1"><label style="font-size:11px">📊 A</label><input type="text" id="newBarcode1" placeholder="内容" oninput="renderAll()"><button class="btn btn-aim" id="aimB1" onclick="startAim('B1')">定位</button><button class="btn btn-lock" id="lockB1" onclick="lockItem()">确认</button></div>
     <div class="barcode-area" id="bar-box-B2"><label style="font-size:11px">📊 B</label><input type="text" id="newBarcode2" placeholder="内容" oninput="renderAll()"><button class="btn btn-aim" id="aimB2" onclick="startAim('B2')">定位</button><button class="btn btn-lock" id="lockB2" onclick="lockItem()">确认</button></div>
     <div id="inputs-area"></div>
@@ -67,16 +60,16 @@
     <div class="joy-slider-box"><span class="joy-label">字号/高度: <b id="sizeVal">40</b>px</span><input type="range" id="floatSize" min="10" max="200" value="40" oninput="_0x2b11(this.value)"></div>
     <div class="joy-slider-box" id="densityBox" style="display:none; border-top:1px dashed #eee;"><span class="joy-label" style="color:#ff9500">渲染密度: <b id="denVal">3.0</b></span><input type="range" id="floatDensity" min="0.5" max="8" step="0.1" value="3" oninput="_0x3c22(this.value)"></div>
     <div class="joy-grid">
-        <div class="joy-btn" style="background:#f9f9f9;font-size:11px;color:#333">粗细<br><select id="floatWeight" style="width:100%;border:none;background:transparent;font-size:10px" onchange="updateActiveParams()"><option value="400">400</option><option value="470">470</option><option value="500" selected>500</option><option value="700">700</option></select></div>
-        <div class="joy-btn" onmousedown="_0x1e33('up')" ontouchstart="_0x1e33('up')">↑</div>
-        <div class="joy-btn" style="background:#f9f9f9;font-size:11px;color:#333">颜色<br><input type="color" id="floatColor" value="#8E8E93" style="width:80%;height:16px;border:none" oninput="updateActiveParams()"></div>
-        <div class="joy-btn" onmousedown="_0x1e33('left')" ontouchstart="_0x1e33('left')">←</div>
-        <div class="joy-btn" onmousedown="_0x1e33('down')" ontouchstart="_0x1e33('down')">↓</div>
-        <div class="joy-btn" onmousedown="_0x1e33('right')" ontouchstart="_0x1e33('right')">→</div>
+        <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333">粗细<br><select id="floatWeight" style="width:100%;border:none;background:transparent;font-size:10px" onchange="updateActiveParams()"><option value="400">400</option><option value="500" selected>500</option><option value="700">700</option></select></div>
+        <div class="joy-btn" onpointerdown="_0xstart('up')" onpointerup="_0xstop()" onpointerleave="_0xstop()">↑</div>
+        <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333">颜色<br><div class="quick-color"><div class="c-btn" style="background:#000" onclick="_0xsetCl('#000000')"></div><div class="c-btn" style="background:#8E8E93" onclick="_0xsetCl('#8E8E93')"></div></div><input type="color" id="floatColor" value="#8E8E93" style="width:100%;height:12px;border:none;padding:0" oninput="updateActiveParams()"></div>
+        <div class="joy-btn" onpointerdown="_0xstart('left')" onpointerup="_0xstop()" onpointerleave="_0xstop()">←</div>
+        <div class="joy-btn" onpointerdown="_0xstart('down')" onpointerup="_0xstop()" onpointerleave="_0xstop()">↓</div>
+        <div class="joy-btn" onpointerdown="_0xstart('right')" onpointerup="_0xstop()" onpointerleave="_0xstop()">→</div>
     </div>
 </div>
 
-<button id="saveBtn" onclick="download()">保存修图结果</button>
+<button id="saveBtn" onclick="_0xDL()">保存修图结果</button>
 
 <script>
     const _0x7a2 = {"RG1tMTEyMjEx": 0x1, "KioqKioqKio=": 0x7, "RE1NMTEyMjExLi4u": 0x1e, "RG1NMjIxMTIyLi4=": 0x16d};
@@ -187,6 +180,7 @@
 
     function _0x2b11(v) { document.getElementById('sizeVal').innerText = v; updateActiveParams(); }
     function _0x3c22(v) { document.getElementById('denVal').innerText = v; updateActiveParams(); }
+    function _0xsetCl(c) { document.getElementById('floatColor').value = c; updateActiveParams(); }
 
     function renderAll() {
         if (!_0xe3) return; _0xd2.drawImage(_0xe3, 0, 0);
@@ -215,18 +209,34 @@
         }
     }
 
-    function _0x1e33(d) {
+    function _0xmove(d) {
         if (_0xf4 && _0xa5[_0xf4]) {
             if(d==='up') _0xa5[_0xf4].y-=1; if(d==='down') _0xa5[_0xf4].y+=1;
             if(d==='left') _0xa5[_0xf4].x-=1; if(d==='right') _0xa5[_0xf4].x+=1; renderAll();
         }
     }
-    function startMove(d) { _0x1e33(d); _0xc7 = setTimeout(() => { _0xd8 = setInterval(() => _0x1e33(d), 45); }, 300); }
-    function stopMove() { clearTimeout(_0xc7); clearInterval(_0xd8); }
-    document.querySelectorAll('.joy-btn').forEach(b => { b.addEventListener('mouseup', stopMove); b.addEventListener('touchend', stopMove); });
+    function _0xstart(d) { _0xmove(d); _0xc7 = setTimeout(() => { _0xd8 = setInterval(() => _0xmove(d), 45); }, 300); }
+    function _0xstop() { clearTimeout(_0xc7); clearInterval(_0xd8); }
 
     function resetAll() { if (confirm("确定重置？")) { localStorage.clear(); location.reload(); } }
-    function download() { _0xf4 = null; renderAll(); const a = document.createElement('a'); a.download = 'result.png'; a.href = _0xc1.toDataURL(); a.click(); }
+
+    function _0xDL() {
+        _0xf4 = null; renderAll();
+        try {
+            const dataUrl = _0xc1.toDataURL("image/png");
+            const a = document.createElement('a');
+            a.download = 'Result_' + new Date().getTime() + '.png';
+            a.href = dataUrl;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(() => {
+                if (confirm("提示：若未自动下载，是否打开大图长按保存？")) {
+                    const w = window.open();
+                    w.document.write('<img src="' + dataUrl + '" style="width:100%" />');
+                    w.document.title = "长按图片保存";
+                }
+            }, 800);
+        } catch (e) { alert("请截图保存"); }
+    }
 </script>
 </body>
 </html>
