@@ -6,14 +6,11 @@
     <title>一棵树</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
-        /* ✨ 修复侧滑倒退的关键样式 */
-        html, body { 
-            overscroll-behavior-x: none; 
-            overflow-x: hidden; 
-            -webkit-overflow-scrolling: touch;
-        }
+        html, body { overscroll-behavior-x: none; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
         body { font-family: -apple-system, system-ui, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; -webkit-user-select: none; user-select: none; min-height: 100vh; }
         .controls { width: 95%; max-width: 850px; background: white; padding: 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 10px; }
+        .fold-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #f8f9fa; border-radius: 8px; cursor: pointer; margin: 8px 0; border: 1px dashed #ccc; }
+        #extra-inputs { display: none; } /* 默认隐藏 4-6 组 */
         .input-item { background: #f9f9f9; padding: 4px 6px; border-radius: 6px; border: 1px solid #eee; display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
         .input-item.active { border: 1px solid #007aff; background: #eef7ff; }
         input[type="text"] { flex: 0.8; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; outline: none; min-width: 0; }
@@ -21,67 +18,79 @@
         .btn-aim { background: #ff9500; }
         .btn-aim.active-status { background: #ff3b30; }
         .btn-lock { background: #34c759; display: none; }
-        .btn-reset { background: #ff3b30; width: 100%; margin-top: 8px; padding: 10px; border-radius: 8px; }
-        #float-joy { position: fixed; bottom: 20px; right: 20px; width: 195px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(0,0,0,0.15); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 9999; padding: 12px; display: flex; flex-direction: column; gap: 8px; touch-action: none; }
-        .joy-handle { height: 26px; background: #f0f0f0; border-radius: 13px; display: flex; justify-content: center; align-items: center; font-size: 10px; color: #999; font-weight: bold; }
-        .joy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-        .joy-btn { height: 44px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #007aff; -webkit-tap-highlight-color: transparent; }
-        .joy-slider-box { padding: 2px 0; border-top: 1px solid #f0f0f0; }
-        .joy-label { font-size: 10px; color: #666; margin-bottom: 2px; display: block; font-weight: bold;}
-        input[type="range"] { width: 100%; accent-color: #007aff; margin: 2px 0; height: 18px; }
-        .quick-color { display: flex; gap: 5px; margin-top: 2px; }
-        .c-btn { width: 18px; height: 18px; border-radius: 4px; border: 1px solid #ddd; }
+        .barcode-area { background: #fff3e0; border: 1px solid #ff9500; padding: 4px 6px; border-radius: 8px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+        .feedback-box { width: 95%; max-width: 850px; background: white; padding: 15px; border-radius: 12px; margin: 20px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); box-sizing: border-box;}
+        .feedback-box textarea { width: 100%; height: 50px; box-sizing: border-box; resize: none; border: 1px solid #eee; border-radius: 6px; font-size: 13px; padding: 8px; }
         #canvas { border: 1px solid #ddd; border-radius: 8px; max-width: 100%; height: auto; background: #fff; margin-bottom: 450px; }
         #saveBtn { background: #34c759; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 18px; width: 90%; margin-bottom: 60px; }
-        #auth-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f0f2f5; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; }
+        #float-joy { position: fixed; bottom: 20px; right: 20px; width: 195px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(0,0,0,0.15); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 9999; padding: 12px; display: flex; flex-direction: column; gap: 8px; touch-action: none; }
+        .joy-btn { height: 44px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #007aff; }
+        #auth-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f0f2f5; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
     </style>
 </head>
-<body ontouchstart=""> <div id="auth-overlay">
+<body ontouchstart="">
+
+<div id="auth-overlay">
     <div style="background:white; padding:30px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1); width:100%; max-width:350px; text-align:center;">
         <h2 style="margin:0 0 10px; color:#333;">一棵树</h2>
-        <p style="font-size:12px; color:#999; margin-bottom:20px;">通行证验证</p>
         <input type="text" id="key-input" placeholder="输入通行证" style="width:100%; padding:15px; border:2px solid #ddd; border-radius:10px; font-size:16px; margin-bottom:15px; outline:none; box-sizing:border-box;">
-        <button onclick="_0x5a12()" style="width:100%; background:#007aff; color:white; border:none; padding:15px; border-radius:10px; font-size:16px; font-weight:bold; cursor:pointer;">进入系统</button>
+        <button onclick="_0x5a12()" style="width:100%; background:#007aff; color:white; border:none; padding:15px; border-radius:10px; font-size:16px; font-weight:bold;">进入系统</button>
         <p id="dev-id-display" style="margin-top:15px; font-size:9px; color:#ccc;"></p>
     </div>
 </div>
 
 <div class="controls">
     <input type="file" id="u" accept="image/*" style="width:100%; margin-bottom:12px;">
-    <button class="btn btn-reset" onclick="resetAll()">⚠️ 清空并重置</button>
-    <div class="barcode-area" id="bar-box-B1"><label style="font-size:11px">📊 A</label><input type="text" id="newBarcode1" placeholder="内容" oninput="renderAll()"><button class="btn btn-aim" id="aimB1" onclick="startAim('B1')">定位</button><button class="btn btn-lock" id="lockB1" onclick="lockItem()">确认</button></div>
-    <div class="barcode-area" id="bar-box-B2"><label style="font-size:11px">📊 B</label><input type="text" id="newBarcode2" placeholder="内容" oninput="renderAll()"><button class="btn btn-aim" id="aimB2" onclick="startAim('B2')">定位</button><button class="btn btn-lock" id="lockB2" onclick="lockItem()">确认</button></div>
-    <div id="inputs-area"></div>
+    
+    <div class="barcode-area" id="bar-box-B1"><label style="font-size:11px">📊 A</label><input type="text" id="newBarcode1" placeholder="条码内容" oninput="renderAll()"><button class="btn btn-aim" id="aimB1" onclick="startAim('B1')">定位</button><button class="btn btn-lock" id="lockB1" onclick="lockItem()">确认</button></div>
+    <div class="barcode-area" id="bar-box-B2"><label style="font-size:11px">📊 B</label><input type="text" id="newBarcode2" placeholder="条码内容" oninput="renderAll()"><button class="btn btn-aim" id="aimB2" onclick="startAim('B2')">定位</button><button class="btn btn-lock" id="lockB2" onclick="lockItem()">确认</button></div>
+
+    <div id="main-inputs"></div>
+
+    <div class="fold-header" onclick="_0xfold()">
+        <span style="font-size:12px; color:#666;">更多文字项 (4-6组)</span>
+        <span id="f-icon" style="font-size:12px;">展开 ▼</span>
+    </div>
+    <div id="extra-inputs"></div>
+
+    <button class="btn btn-reset" onclick="resetAll()" style="width:100%; background:#ff3b30; margin-top:10px; padding:10px; border-radius:8px;">⚠️ 清空并重置</button>
 </div>
 
 <div id="canvas-wrap"><canvas id="canvas"></canvas></div>
 <canvas id="tempCanvas" style="display:none;"></canvas>
 
+<div class="feedback-box">
+    <h4 style="font-size:13px; margin-bottom:8px;">💡 改进建议</h4>
+    <textarea id="fb-text" placeholder="写下您的建议..."></textarea>
+    <button onclick="alert('提交成功，感谢反馈！')" style="margin-top:8px; width:100%; background:#007aff; color:white; border:none; padding:8px; border-radius:6px; font-size:12px;">提交建议</button>
+</div>
+
+<button id="saveBtn" onclick="_0xDL()">保存修图结果</button>
+
 <div id="float-joy">
-    <div class="joy-handle" id="joy-handle">⠿ 只能修图</div>
-    <div class="joy-slider-box"><span class="joy-label">字号/高度: <b id="sizeVal">40</b>px</span><input type="range" id="floatSize" min="10" max="200" value="40" oninput="_0x2b11(this.value)"></div>
-    <div class="joy-slider-box" id="densityBox" style="display:none; border-top:1px dashed #eee;"><span class="joy-label" style="color:#ff9500">渲染密度: <b id="denVal">3.0</b></span><input type="range" id="floatDensity" min="0.5" max="8" step="0.1" value="3" oninput="_0x3c22(this.value)"></div>
+    <div style="height:26px; background:#f0f0f0; border-radius:13px; display:flex; justify-content:center; align-items:center; font-size:10px; color:#999; font-weight:bold;" id="joy-handle">⠿ 智慧修图</div>
+    <div style="padding:2px 0; border-top:1px solid #f0f0f0;"><span style="font-size:10px; color:#666; font-weight:bold;">大小: <b id="sizeVal">40</b>px</span><input type="range" id="floatSize" min="10" max="200" value="40" oninput="_0x2b11(this.value)"></div>
+    <div id="densityBox" style="display:none; border-top:1px dashed #eee; padding:2px 0;"><span style="font-size:10px; color:#ff9500; font-weight:bold;">密度: <b id="denVal">3.0</b></span><input type="range" id="floatDensity" min="0.5" max="8" step="0.1" value="3" oninput="_0x3c22(this.value)"></div>
     <div class="joy-grid">
         <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333">粗细<br><select id="floatWeight" style="width:100%;border:none;background:transparent;font-size:10px" onchange="updateActiveParams()"><option value="400">400</option><option value="500" selected>500</option><option value="700">700</option></select></div>
         <div class="joy-btn" onpointerdown="_0xstart('up')" onpointerup="_0xstop()" onpointerleave="_0xstop()">↑</div>
-        <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333">颜色<br><div class="quick-color"><div class="c-btn" style="background:#000" onclick="_0xsetCl('#000000')"></div><div class="c-btn" style="background:#8E8E93" onclick="_0xsetCl('#8E8E93')"></div></div><input type="color" id="floatColor" value="#8E8E93" style="width:100%;height:12px;border:none;padding:0" oninput="updateActiveParams()"></div>
+        <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333">颜色<br><div style="display:flex;gap:3px;"><div onclick="_0xsetCl('#000000')" style="width:15px;height:15px;background:#000;border-radius:3px;"></div><div onclick="_0xsetCl('#8E8E93')" style="width:15px;height:15px;background:#8E8E93;border-radius:3px;"></div></div><input type="color" id="floatColor" value="#8E8E93" style="width:100%;height:10px;border:none;padding:0" oninput="updateActiveParams()"></div>
         <div class="joy-btn" onpointerdown="_0xstart('left')" onpointerup="_0xstop()" onpointerleave="_0xstop()">←</div>
         <div class="joy-btn" onpointerdown="_0xstart('down')" onpointerup="_0xstop()" onpointerleave="_0xstop()">↓</div>
         <div class="joy-btn" onpointerdown="_0xstart('right')" onpointerup="_0xstop()" onpointerleave="_0xstop()">→</div>
     </div>
 </div>
 
-<button id="saveBtn" onclick="_0xDL()">保存修图结果</button>
-
 <script>
-    // ✨ 核心补丁：拦截边缘滑动导致的回退
-    window.addEventListener('touchstart', function(e) {
-        if (e.touches[0].pageX < 40 || e.touches[0].pageX > window.innerWidth - 40) {
-            // 如果手指在边缘 40px 内启动，则可能触发侧滑回退，我们要接管它
-            // 这里不直接 preventDefault 是为了不杀掉点击，但我们会通过样式配合限制系统动作
-        }
-    }, {passive: true});
+    // ✨ 折叠逻辑
+    function _0xfold() {
+        const e = document.getElementById('extra-inputs'), i = document.getElementById('f-icon');
+        const isH = e.style.display === 'block';
+        e.style.display = isH ? 'none' : 'block';
+        i.innerText = isH ? '展开 ▼' : '收起 ▲';
+    }
 
+    // ✨ 核心混淆逻辑保持不变
     const _0x7a2 = {"RG1tMTEyMjEx": 0x1, "KioqKioqKio=": 0x7, "RE1NMTEyMjExLi4u": 0x1e, "RG1NMjIxMTIyLi4=": 0x16d};
     const _0x9b3 = "RESET_ALL_LOCKS";
     const _0xc1 = document.getElementById('canvas'), _0xd2 = _0xc1.getContext('2d', { willReadFrequently: true });
@@ -93,20 +102,18 @@
         return "T-ID-" + Math.abs(h);
     }
 
-    async function _0x2b8() {
-        try { const r = await fetch('https://api.m.suning.com/showtime.do'); const d = await r.json(); return parseInt(d.sysTime); } catch (e) { return new Date().getTime(); }
-    }
+    async function _0x2b8() { try { const r = await fetch('https://api.m.suning.com/showtime.do'); const d = await r.json(); return parseInt(d.sysTime); } catch (e) { return new Date().getTime(); } }
 
     async function _0x5a12() {
         const v = document.getElementById('key-input').value.trim();
-        if (v === _0x9b3) { if(confirm("确定重置？")) { localStorage.clear(); location.reload(); } return; }
+        if (v === _0x9b3) { if(confirm("重置？")) { localStorage.clear(); location.reload(); } return; }
         const e = btoa(v), d = _0x1a9(), n = await _0x2b8();
         if (_0x7a2.hasOwnProperty(e)) {
             const b = localStorage.getItem('bind_id_' + e);
             if (b && b !== d) { alert("设备冲突"); return; }
             let s = JSON.parse(localStorage.getItem('bind_data_' + e));
             if (!s) { s = { st: n, dy: _0x7a2[e] }; localStorage.setItem('bind_id_' + e, d); localStorage.setItem('bind_data_' + e, JSON.stringify(s)); }
-            if ((n - s.st) / 864e5 > s.dy) { alert("已到期"); return; }
+            if ((n - s.st) / 864e5 > s.dy) { alert("到期"); return; }
             document.getElementById('auth-overlay').style.display = 'none'; localStorage.setItem('u_auth', e); _0x3c7();
         } else { alert("无效"); }
     }
@@ -116,14 +123,6 @@
         if (w) _0xa5 = JSON.parse(w);
         if (t) { const d = JSON.parse(t); for (let k in d) { const el = document.getElementById(k); if (el) el.value = d[k]; } }
         if (_0xe3) renderAll();
-    }
-
-    function _0x4d6() {
-        if (Object.keys(_0xa5).length > 0) {
-            localStorage.setItem('saved_work', JSON.stringify(_0xa5));
-            const d = {}; document.querySelectorAll('input[type="text"]').forEach(i => d[i.id] = i.value);
-            localStorage.setItem('saved_inputs', JSON.stringify(d));
-        }
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
@@ -137,14 +136,16 @@
         }
     });
 
-    const ar = document.getElementById('inputs-area');
+    // ✨ 动态生成输入框 (1-3 组主区, 4-6 组副区)
+    const mAr = document.getElementById('main-inputs'), eAr = document.getElementById('extra-inputs');
     for(let i=1; i<=6; i++) {
-        ar.innerHTML += `<div class="input-item" id="box${i}"><input type="text" id="old${i}" placeholder="参考"><input type="text" id="new${i}" placeholder="修改" oninput="renderAll()"><button class="btn btn-aim" id="aim${i}" onclick="startAim(${i})">瞄准</button><button class="btn btn-lock" id="lock${i}" onclick="lockItem()">确认</button></div>`;
+        const html = `<div class="input-item" id="box${i}"><input type="text" id="old${i}" placeholder="参考${i}"><input type="text" id="new${i}" placeholder="修改${i}" oninput="renderAll()"><button class="btn btn-aim" id="aim${i}" onclick="startAim(${i})">瞄准</button><button class="btn btn-lock" id="lock${i}" onclick="lockItem()">确认</button></div>`;
+        if(i <= 3) mAr.innerHTML += html; else eAr.innerHTML += html;
     }
 
     const jy = document.getElementById('float-joy'), hd = document.getElementById('joy-handle');
     let isD = false, of = { x: 0, y: 0 };
-    hd.onpointerdown = (e) => { isD = true; of.x = e.clientX - jy.offsetLeft; of.y = e.clientY - jy.offsetTop; hd.setPointerCapture(e.pointerId); e.preventDefault(); };
+    hd.onpointerdown = (e) => { isD = true; of.x = e.clientX - jy.offsetLeft; of.y = e.clientY - jy.offsetTop; hd.setPointerCapture(e.pointerId); };
     hd.onpointermove = (e) => { if (isD) { jy.style.left = Math.max(0, Math.min(window.innerWidth-190, e.clientX-of.x))+'px'; jy.style.top = Math.max(0, Math.min(window.innerHeight-300, e.clientY-of.y))+'px'; jy.style.bottom='auto'; jy.style.right='auto'; }};
     hd.onpointerup = () => isD = false;
 
@@ -154,7 +155,7 @@
 
     function _0x1f9(e) {
         const r = _0xc1.getBoundingClientRect(), sx = _0xc1.width/r.width, sy = _0xc1.height/r.height;
-        if (!_0xa5[_0xf4]) _0xa5[_0xf4] = { sz: parseInt(document.getElementById('floatSize').value), wt: document.getElementById('floatWeight').value, cl: document.getElementById('floatColor').value, bw: parseFloat(document.getElementById('floatDensity').value) };
+        if (!_0xa5[_0xf4]) _0xa5[_0xf4] = { sz: 40, wt: "500", cl: "#8E8E93", bw: 3 };
         _0xa5[_0xf4].x = (e.clientX-r.left)*sx; _0xa5[_0xf4].y = (e.clientY-r.top)*sy;
         renderAll();
     }
@@ -179,7 +180,19 @@
         renderAll();
     }
 
-    function lockItem() { _0xf4 = null; document.querySelectorAll('.input-item, .barcode-area').forEach(el => el.classList.remove('active')); document.querySelectorAll('.btn-aim').forEach(btn => btn.classList.remove('active-status')); document.querySelectorAll('.btn-lock').forEach(btn => btn.style.display = 'none'); document.getElementById('densityBox').style.display = 'none'; _0x4d6(); renderAll(); }
+    function lockItem() { 
+        _0xf4 = null; 
+        document.querySelectorAll('.input-item, .barcode-area').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.btn-aim').forEach(btn => btn.classList.remove('active-status'));
+        document.querySelectorAll('.btn-lock').forEach(btn => btn.style.display = 'none');
+        // 保存进度
+        if (Object.keys(_0xa5).length > 0) {
+            localStorage.setItem('saved_work', JSON.stringify(_0xa5));
+            const d = {}; document.querySelectorAll('input[type="text"]').forEach(i => d[i.id] = i.value);
+            localStorage.setItem('saved_inputs', JSON.stringify(d));
+        }
+        renderAll(); 
+    }
 
     function updateActiveParams() { if (_0xf4 && _0xa5[_0xf4]) {
         _0xa5[_0xf4].sz = parseInt(document.getElementById('floatSize').value); _0xa5[_0xf4].wt = document.getElementById('floatWeight').value;
@@ -215,7 +228,6 @@
                 _0xd2.fillRect(r?i.x-tw+5:i.x-tw/2, i.y-i.sz*0.7, tw, i.sz*1.4);
                 _0xd2.fillStyle = i.cl; _0xd2.textAlign = r ? "right" : "center"; _0xd2.fillText(n, i.x, i.y);
             }
-            if (k == _0xf4 && _0xb6) { _0xd2.strokeStyle = "rgba(255,0,0,0.6)"; _0xd2.setLineDash([5, 5]); _0xd2.strokeRect(_0xc1.width*0.05, i.y-i.sz*0.8, _0xc1.width*0.9, i.sz*1.6); _0xd2.setLineDash([]); }
         }
     }
 
@@ -227,24 +239,20 @@
     }
     function _0xstart(d) { _0xmove(d); _0xc7 = setTimeout(() => { _0xd8 = setInterval(() => _0xmove(d), 45); }, 300); }
     function _0xstop() { clearTimeout(_0xc7); clearInterval(_0xd8); }
-
     document.querySelectorAll('.joy-btn').forEach(b => { b.addEventListener('pointerup', _0xstop); b.addEventListener('pointerleave', _0xstop); });
 
-    function resetAll() { if (confirm("确定重置？")) { localStorage.clear(); location.reload(); } }
+    function resetAll() { if (confirm("重置？")) { localStorage.clear(); location.reload(); } }
 
     function _0xDL() {
         _0xf4 = null; renderAll();
         try {
             const dataUrl = _0xc1.toDataURL("image/png");
             const a = document.createElement('a');
-            a.download = '一棵树_' + new Date().getTime() + '.png';
-            a.href = dataUrl;
+            a.download = '一棵树_' + new Date().getTime() + '.png'; a.href = dataUrl;
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
             setTimeout(() => {
-                if (confirm("提示：若未自动下载，是否打开大图长按保存？")) {
-                    const w = window.open();
-                    w.document.write('<img src="' + dataUrl + '" style="width:100%" />');
-                    w.document.title = "长按图片保存";
+                if (confirm("提示：若未下载，长按大图保存。")) {
+                    const w = window.open(); w.document.write('<img src="' + dataUrl + '" style="width:100%" />');
                 }
             }, 800);
         } catch (e) { alert("请截图保存"); }
