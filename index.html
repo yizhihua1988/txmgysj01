@@ -8,9 +8,9 @@
     <style>
         html, body { overscroll-behavior-x: none; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
         body { font-family: -apple-system, system-ui, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; -webkit-user-select: none; user-select: none; min-height: 100vh; }
-        .controls { width: 95%; max-width: 850px; background: white; padding: 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 10px; }
-        .fold-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #f8f9fa; border-radius: 8px; cursor: pointer; margin: 8px 0; border: 1px dashed #ccc; }
-        #extra-inputs { display: none; } /* 默认隐藏 4-6 组 */
+        .controls { width: 95%; max-width: 850px; background: white; padding: 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 10px; box-sizing: border-box; }
+        
+        /* 布局优化 */
         .input-item { background: #f9f9f9; padding: 4px 6px; border-radius: 6px; border: 1px solid #eee; display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
         .input-item.active { border: 1px solid #007aff; background: #eef7ff; }
         input[type="text"] { flex: 0.8; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; outline: none; min-width: 0; }
@@ -19,13 +19,24 @@
         .btn-aim.active-status { background: #ff3b30; }
         .btn-lock { background: #34c759; display: none; }
         .barcode-area { background: #fff3e0; border: 1px solid #ff9500; padding: 4px 6px; border-radius: 8px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
-        .feedback-box { width: 95%; max-width: 850px; background: white; padding: 15px; border-radius: 12px; margin: 20px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); box-sizing: border-box;}
-        .feedback-box textarea { width: 100%; height: 50px; box-sizing: border-box; resize: none; border: 1px solid #eee; border-radius: 6px; font-size: 13px; padding: 8px; }
+        
+        /* 折叠区 */
+        .fold-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #f8f9fa; border-radius: 8px; cursor: pointer; margin: 8px 0; border: 1px dashed #ccc; width: 100%; box-sizing: border-box; }
+        #extra-inputs { display: none; width: 100%; }
+
+        /* 🎮 修复后的浮窗样式 - 拒绝变形 */
+        #float-joy { position: fixed; bottom: 20px; right: 20px; width: 195px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(0,0,0,0.15); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 9999; padding: 12px; display: flex; flex-direction: column; gap: 8px; touch-action: none; box-sizing: border-box; }
+        .joy-handle { height: 26px; background: #f0f0f0; border-radius: 13px; display: flex; justify-content: center; align-items: center; font-size: 10px; color: #999; font-weight: bold; cursor: move; }
+        .joy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; }
+        .joy-btn { height: 46px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #007aff; box-sizing: border-box; }
+        
+        .joy-slider-box { padding: 4px 0; border-top: 1px solid #f0f0f0; width: 100%; }
+        .joy-label { font-size: 10px; color: #666; margin-bottom: 2px; display: block; font-weight: bold; }
+        input[type="range"] { width: 100%; accent-color: #007aff; margin: 2px 0; height: 18px; }
+
         #canvas { border: 1px solid #ddd; border-radius: 8px; max-width: 100%; height: auto; background: #fff; margin-bottom: 450px; }
-        #saveBtn { background: #34c759; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 18px; width: 90%; margin-bottom: 60px; }
-        #float-joy { position: fixed; bottom: 20px; right: 20px; width: 195px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(0,0,0,0.15); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 9999; padding: 12px; display: flex; flex-direction: column; gap: 8px; touch-action: none; }
-        .joy-btn { height: 44px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #007aff; }
-        #auth-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f0f2f5; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
+        #saveBtn { background: #34c759; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 18px; width: 90%; margin-bottom: 60px; cursor: pointer; }
+        #auth-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f0f2f5; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing: border-box;}
     </style>
 </head>
 <body ontouchstart="">
@@ -42,8 +53,8 @@
 <div class="controls">
     <input type="file" id="u" accept="image/*" style="width:100%; margin-bottom:12px;">
     
-    <div class="barcode-area" id="bar-box-B1"><label style="font-size:11px">📊 A</label><input type="text" id="newBarcode1" placeholder="条码内容" oninput="renderAll()"><button class="btn btn-aim" id="aimB1" onclick="startAim('B1')">定位</button><button class="btn btn-lock" id="lockB1" onclick="lockItem()">确认</button></div>
-    <div class="barcode-area" id="bar-box-B2"><label style="font-size:11px">📊 B</label><input type="text" id="newBarcode2" placeholder="条码内容" oninput="renderAll()"><button class="btn btn-aim" id="aimB2" onclick="startAim('B2')">定位</button><button class="btn btn-lock" id="lockB2" onclick="lockItem()">确认</button></div>
+    <div class="barcode-area" id="bar-box-B1"><label style="font-size:11px">📊 A</label><input type="text" id="newBarcode1" placeholder="内容" oninput="renderAll()"><button class="btn btn-aim" id="aimB1" onclick="startAim('B1')">定位</button><button class="btn btn-lock" id="lockB1" onclick="lockItem()">确认</button></div>
+    <div class="barcode-area" id="bar-box-B2"><label style="font-size:11px">📊 B</label><input type="text" id="newBarcode2" placeholder="内容" oninput="renderAll()"><button class="btn btn-aim" id="aimB2" onclick="startAim('B2')">定位</button><button class="btn btn-lock" id="lockB2" onclick="lockItem()">确认</button></div>
 
     <div id="main-inputs"></div>
 
@@ -59,22 +70,16 @@
 <div id="canvas-wrap"><canvas id="canvas"></canvas></div>
 <canvas id="tempCanvas" style="display:none;"></canvas>
 
-<div class="feedback-box">
-    <h4 style="font-size:13px; margin-bottom:8px;">💡 改进建议</h4>
-    <textarea id="fb-text" placeholder="写下您的建议..."></textarea>
-    <button onclick="alert('提交成功，感谢反馈！')" style="margin-top:8px; width:100%; background:#007aff; color:white; border:none; padding:8px; border-radius:6px; font-size:12px;">提交建议</button>
-</div>
-
 <button id="saveBtn" onclick="_0xDL()">保存修图结果</button>
 
 <div id="float-joy">
-    <div style="height:26px; background:#f0f0f0; border-radius:13px; display:flex; justify-content:center; align-items:center; font-size:10px; color:#999; font-weight:bold;" id="joy-handle">⠿ 智慧修图</div>
-    <div style="padding:2px 0; border-top:1px solid #f0f0f0;"><span style="font-size:10px; color:#666; font-weight:bold;">大小: <b id="sizeVal">40</b>px</span><input type="range" id="floatSize" min="10" max="200" value="40" oninput="_0x2b11(this.value)"></div>
-    <div id="densityBox" style="display:none; border-top:1px dashed #eee; padding:2px 0;"><span style="font-size:10px; color:#ff9500; font-weight:bold;">密度: <b id="denVal">3.0</b></span><input type="range" id="floatDensity" min="0.5" max="8" step="0.1" value="3" oninput="_0x3c22(this.value)"></div>
+    <div class="joy-handle" id="joy-handle">⠿ 智慧修图</div>
+    <div class="joy-slider-box"><span class="joy-label">字号/高度: <b id="sizeVal">40</b>px</span><input type="range" id="floatSize" min="10" max="200" value="40" oninput="_0x2b11(this.value)"></div>
+    <div class="joy-slider-box" id="densityBox" style="display:none; border-top:1px dashed #eee;"><span class="joy-label" style="color:#ff9500">渲染密度: <b id="denVal">3.0</b></span><input type="range" id="floatDensity" min="0.5" max="8" step="0.1" value="3" oninput="_0x3c22(this.value)"></div>
     <div class="joy-grid">
-        <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333">粗细<br><select id="floatWeight" style="width:100%;border:none;background:transparent;font-size:10px" onchange="updateActiveParams()"><option value="400">400</option><option value="500" selected>500</option><option value="700">700</option></select></div>
+        <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333;flex-direction:column;">粗细<select id="floatWeight" style="width:90%;border:none;background:transparent;font-size:10px;text-align:center;" onchange="updateActiveParams()"><option value="400">400</option><option value="500" selected>500</option><option value="700">700</option></select></div>
         <div class="joy-btn" onpointerdown="_0xstart('up')" onpointerup="_0xstop()" onpointerleave="_0xstop()">↑</div>
-        <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333">颜色<br><div style="display:flex;gap:3px;"><div onclick="_0xsetCl('#000000')" style="width:15px;height:15px;background:#000;border-radius:3px;"></div><div onclick="_0xsetCl('#8E8E93')" style="width:15px;height:15px;background:#8E8E93;border-radius:3px;"></div></div><input type="color" id="floatColor" value="#8E8E93" style="width:100%;height:10px;border:none;padding:0" oninput="updateActiveParams()"></div>
+        <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333;flex-direction:column;">颜色<div style="display:flex;gap:3px;margin-bottom:2px;"><div onclick="_0xsetCl('#000000')" style="width:14px;height:14px;background:#000;border-radius:3px;border:1px solid #ddd;"></div><div onclick="_0xsetCl('#8E8E93')" style="width:14px;height:14px;background:#8E8E93;border-radius:3px;border:1px solid #ddd;"></div></div><input type="color" id="floatColor" value="#8E8E93" style="width:80%;height:10px;border:none;padding:0;background:transparent;" oninput="updateActiveParams()"></div>
         <div class="joy-btn" onpointerdown="_0xstart('left')" onpointerup="_0xstop()" onpointerleave="_0xstop()">←</div>
         <div class="joy-btn" onpointerdown="_0xstart('down')" onpointerup="_0xstop()" onpointerleave="_0xstop()">↓</div>
         <div class="joy-btn" onpointerdown="_0xstart('right')" onpointerup="_0xstop()" onpointerleave="_0xstop()">→</div>
@@ -82,7 +87,6 @@
 </div>
 
 <script>
-    // ✨ 折叠逻辑
     function _0xfold() {
         const e = document.getElementById('extra-inputs'), i = document.getElementById('f-icon');
         const isH = e.style.display === 'block';
@@ -90,7 +94,6 @@
         i.innerText = isH ? '展开 ▼' : '收起 ▲';
     }
 
-    // ✨ 核心混淆逻辑保持不变
     const _0x7a2 = {"RG1tMTEyMjEx": 0x1, "KioqKioqKio=": 0x7, "RE1NMTEyMjExLi4u": 0x1e, "RG1NMjIxMTIyLi4=": 0x16d};
     const _0x9b3 = "RESET_ALL_LOCKS";
     const _0xc1 = document.getElementById('canvas'), _0xd2 = _0xc1.getContext('2d', { willReadFrequently: true });
@@ -106,7 +109,7 @@
 
     async function _0x5a12() {
         const v = document.getElementById('key-input').value.trim();
-        if (v === _0x9b3) { if(confirm("重置？")) { localStorage.clear(); location.reload(); } return; }
+        if (v === _0x9b3) { if(confirm("重置系统？")) { localStorage.clear(); location.reload(); } return; }
         const e = btoa(v), d = _0x1a9(), n = await _0x2b8();
         if (_0x7a2.hasOwnProperty(e)) {
             const b = localStorage.getItem('bind_id_' + e);
@@ -136,17 +139,16 @@
         }
     });
 
-    // ✨ 动态生成输入框 (1-3 组主区, 4-6 组副区)
     const mAr = document.getElementById('main-inputs'), eAr = document.getElementById('extra-inputs');
     for(let i=1; i<=6; i++) {
-        const html = `<div class="input-item" id="box${i}"><input type="text" id="old${i}" placeholder="参考${i}"><input type="text" id="new${i}" placeholder="修改${i}" oninput="renderAll()"><button class="btn btn-aim" id="aim${i}" onclick="startAim(${i})">瞄准</button><button class="btn btn-lock" id="lock${i}" onclick="lockItem()">确认</button></div>`;
-        if(i <= 3) mAr.innerHTML += html; else eAr.innerHTML += html;
+        const h = `<div class="input-item" id="box${i}"><input type="text" id="old${i}" placeholder="参考${i}"><input type="text" id="new${i}" placeholder="修改${i}" oninput="renderAll()"><button class="btn btn-aim" id="aim${i}" onclick="startAim(${i})">定位</button><button class="btn btn-lock" id="lock${i}" onclick="lockItem()">确认</button></div>`;
+        if(i <= 3) mAr.innerHTML += h; else eAr.innerHTML += h;
     }
 
     const jy = document.getElementById('float-joy'), hd = document.getElementById('joy-handle');
     let isD = false, of = { x: 0, y: 0 };
     hd.onpointerdown = (e) => { isD = true; of.x = e.clientX - jy.offsetLeft; of.y = e.clientY - jy.offsetTop; hd.setPointerCapture(e.pointerId); };
-    hd.onpointermove = (e) => { if (isD) { jy.style.left = Math.max(0, Math.min(window.innerWidth-190, e.clientX-of.x))+'px'; jy.style.top = Math.max(0, Math.min(window.innerHeight-300, e.clientY-of.y))+'px'; jy.style.bottom='auto'; jy.style.right='auto'; }};
+    hd.onpointermove = (e) => { if (isD) { jy.style.left = Math.max(0, Math.min(window.innerWidth-195, e.clientX-of.x))+'px'; jy.style.top = Math.max(0, Math.min(window.innerHeight-300, e.clientY-of.y))+'px'; jy.style.bottom='auto'; jy.style.right='auto'; }};
     hd.onpointerup = () => isD = false;
 
     _0xc1.onpointerdown = (e) => { if (_0xf4 === null) return; _0xb6 = true; _0x1f9(e); _0xc1.setPointerCapture(e.pointerId); };
@@ -185,7 +187,6 @@
         document.querySelectorAll('.input-item, .barcode-area').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.btn-aim').forEach(btn => btn.classList.remove('active-status'));
         document.querySelectorAll('.btn-lock').forEach(btn => btn.style.display = 'none');
-        // 保存进度
         if (Object.keys(_0xa5).length > 0) {
             localStorage.setItem('saved_work', JSON.stringify(_0xa5));
             const d = {}; document.querySelectorAll('input[type="text"]').forEach(i => d[i.id] = i.value);
@@ -251,11 +252,11 @@
             a.download = '一棵树_' + new Date().getTime() + '.png'; a.href = dataUrl;
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
             setTimeout(() => {
-                if (confirm("提示：若未下载，长按大图保存。")) {
+                if (confirm("下载失败？请打开预览图长按保存。")) {
                     const w = window.open(); w.document.write('<img src="' + dataUrl + '" style="width:100%" />');
                 }
             }, 800);
-        } catch (e) { alert("请截图保存"); }
+        } catch (e) { alert("截图保存"); }
     }
 </script>
 </body>
