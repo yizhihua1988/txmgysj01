@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>一棵树</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         html, body { overscroll-behavior-x: none; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
@@ -23,21 +22,22 @@
         #float-joy { position: fixed; bottom: 20px; right: 20px; width: 195px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(0,0,0,0.15); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 9999; padding: 12px; display: flex; flex-direction: column; gap: 8px; touch-action: none; box-sizing: border-box; }
         .joy-handle { height: 26px; background: #f0f0f0; border-radius: 13px; display: flex; justify-content: center; align-items: center; font-size: 10px; color: #999; font-weight: bold; cursor: move; }
         .joy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; }
-        .joy-btn { height: 46px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #007aff; }
-        .feedback-box { width: 95%; max-width: 850px; background: white; padding: 15px; border-radius: 12px; margin: 20px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); box-sizing: border-box;}
-        .feedback-box textarea { width: 100%; height: 50px; box-sizing: border-box; resize: none; border: 1px solid #eee; border-radius: 6px; font-size: 13px; padding: 8px; outline: none; }
+        .joy-btn { height: 46px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #007aff; box-sizing: border-box; }
+        .joy-slider-box { padding: 4px 0; border-top: 1px solid #f0f0f0; width: 100%; }
+        .joy-label { font-size: 10px; color: #666; margin-bottom: 2px; display: block; font-weight: bold; }
+        input[type="range"] { width: 100%; accent-color: #007aff; margin: 2px 0; height: 18px; }
         #canvas { border: 1px solid #ddd; border-radius: 8px; max-width: 100%; height: auto; background: #fff; margin-bottom: 450px; }
-        #saveBtn { background: #34c759; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 18px; width: 90%; margin-bottom: 60px; }
-        #auth-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f0f2f5; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
+        #saveBtn { background: #34c759; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 18px; width: 90%; margin-bottom: 60px; cursor: pointer; }
+        #auth-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f0f2f5; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing: border-box;}
     </style>
 </head>
-<body>
+<body ontouchstart="">
 
 <div id="auth-overlay">
     <div style="background:white; padding:30px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1); width:100%; max-width:350px; text-align:center;">
         <h2 style="margin:0 0 10px; color:#333;">一棵树</h2>
         <input type="text" id="key-input" placeholder="输入通行证" style="width:100%; padding:15px; border:2px solid #ddd; border-radius:10px; font-size:16px; margin-bottom:15px; outline:none; box-sizing:border-box;">
-        <button id="login-btn" style="width:100%; background:#007aff; color:white; border:none; padding:15px; border-radius:10px; font-size:16px; font-weight:bold; cursor:pointer;">进入系统</button>
+        <button id="_0xbtn" style="width:100%; background:#007aff; color:white; border:none; padding:15px; border-radius:10px; font-size:16px; font-weight:bold;">进入系统</button>
         <p id="dev-id-display" style="margin-top:15px; font-size:9px; color:#ccc;"></p>
     </div>
 </div>
@@ -55,46 +55,46 @@
 <div id="canvas-wrap"><canvas id="canvas"></canvas></div>
 <canvas id="tempCanvas" style="display:none;"></canvas>
 
-<div class="feedback-box">
-    <h4 style="font-size:13px; margin-bottom:8px;">💡 改进建议</h4>
-    <textarea id="fb-text" placeholder="写下您的建议..."></textarea>
-    <button onclick="_0xFB()" style="margin-top:8px; width:100%; background:#007aff; color:white; border:none; padding:8px; border-radius:6px; font-size:12px;">提交建议</button>
-</div>
-
 <button id="saveBtn" onclick="_0xDL()">保存修图结果</button>
 
 <div id="float-joy">
     <div class="joy-handle" id="joy-handle">⠿ 智慧修图</div>
-    <div style="padding:4px 0; border-top:1px solid #f0f0f0; width:100%;"><span style="font-size:10px; color:#666; font-weight:bold;">大小: <b id="sizeVal">40</b>px</span><input type="range" id="floatSize" min="10" max="200" value="40" oninput="_0x2b11(this.value)"></div>
-    <div id="densityBox" style="display:none; border-top:1px dashed #eee; width:100%; padding:4px 0;"><span style="font-size:10px; color:#ff9500; font-weight:bold;">密度: <b id="denVal">3.0</b></span><input type="range" id="floatDensity" min="0.5" max="8" step="0.1" value="3" oninput="_0x3c22(this.value)"></div>
+    <div class="joy-slider-box"><span class="joy-label">字号/高度: <b id="sizeVal">40</b>px</span><input type="range" id="floatSize" min="10" max="200" value="40" oninput="_0x2b11(this.value)"></div>
+    <div class="joy-slider-box" id="densityBox" style="display:none; border-top:1px dashed #eee;"><span class="joy-label" style="color:#ff9500">渲染密度: <b id="denVal">3.0</b></span><input type="range" id="floatDensity" min="0.5" max="8" step="0.1" value="3" oninput="_0x3c22(this.value)"></div>
     <div class="joy-grid">
         <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333;flex-direction:column;">粗细<select id="floatWeight" style="width:90%;border:none;background:transparent;font-size:10px;text-align:center;" onchange="updateActiveParams()"><option value="400">400</option><option value="470">470</option><option value="500" selected>500</option><option value="600">600</option><option value="700">700</option></select></div>
-        <div class="joy-btn" onpointerdown="_0xstart('up')" onpointerup="_0xstop()">↑</div>
-        <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333;flex-direction:column;">颜色<div style="display:flex;gap:3px;"><div onclick="_0xsetCl('#000000')" style="width:14px;height:14px;background:#000;border-radius:3px;border:1px solid #ddd;"></div><div onclick="_0xsetCl('#8E8E93')" style="width:14px;height:14px;background:#8E8E93;border-radius:3px;border:1px solid #ddd;"></div></div><input type="color" id="floatColor" value="#8E8E93" style="width:80%;height:10px;border:none;padding:0;background:transparent;" oninput="updateActiveParams()"></div>
-        <div class="joy-btn" onpointerdown="_0xstart('left')" onpointerup="_0xstop()">←</div>
-        <div class="joy-btn" onpointerdown="_0xstart('down')" onpointerup="_0xstop()">↓</div>
-        <div class="joy-btn" onpointerdown="_0xstart('right')" onpointerup="_0xstop()">→</div>
+        <div class="joy-btn" onpointerdown="_0xstart('up')" onpointerup="_0xstop()" onpointerleave="_0xstop()">↑</div>
+        <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333;flex-direction:column;">颜色<div style="display:flex;gap:3px;margin-bottom:2px;"><div onclick="_0xsetCl('#000000')" style="width:14px;height:14px;background:#000;border-radius:3px;border:1px solid #ddd;"></div><div onclick="_0xsetCl('#8E8E93')" style="width:14px;height:14px;background:#8E8E93;border-radius:3px;border:1px solid #ddd;"></div></div><input type="color" id="floatColor" value="#8E8E93" style="width:80%;height:10px;border:none;padding:0;background:transparent;" oninput="updateActiveParams()"></div>
+        <div class="joy-btn" onpointerdown="_0xstart('left')" onpointerup="_0xstop()" onpointerleave="_0xstop()">←</div>
+        <div class="joy-btn" onpointerdown="_0xstart('down')" onpointerup="_0xstop()" onpointerleave="_0xstop()">↓</div>
+        <div class="joy-btn" onpointerdown="_0xstart('right')" onpointerup="_0xstop()" onpointerleave="_0xstop()">→</div>
     </div>
 </div>
 
 <script>
-    // 🛡️ 防调试保护
+    /* 🛡️ 核心护盾逻辑：禁止 F12、右键及源码查看 */
     (function(){
-        function _0xdet(){try{(function(){return false}['constructor']('debugger')['call']())}catch(e){}}
-        setInterval(_0xdet, 100);
+        function _0xguard(){try{(function(){return false}['constructor']('debugger')['call']())}catch(e){}}
+        setInterval(_0xguard, 200);
         document.oncontextmenu = () => false;
+        document.onkeydown = (e) => {
+            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) return false;
+        };
     })();
 
-    // 🔐 配置
-    const _0xU = "你的URL";
-    const _0xK = "你的KEY";
-    const _db = (typeof supabase !== 'undefined') ? supabase.createClient(_0xU, _0xK) : null;
-    const _0x7a2 = {"RG1tMTEyMjEx": 7, "KioqKioqKio=": 15, "RE1NMTEyMjExLi4u": 30, "RG1NMjIxMTIyLi4=": 365};
+    /* 🔑 业务与验证逻辑 */
+    function _0xfold() {
+        const e = document.getElementById('extra-inputs'), i = document.getElementById('f-icon');
+        const isH = e.style.display === 'block';
+        e.style.display = isH ? 'none' : 'block';
+        i.innerText = isH ? '展开 ▼' : '收起 ▲';
+    }
 
+    const _0xLib = {"RG1tMTEyMjEx": 0x1, "KioqKioqKio=": 0x7, "RE1NMTEyMjExLi4u": 0x1e, "RG1NMjIxMTIyLi4=": 0x16d};
+    const _0x9b3 = "RESET_ALL_LOCKS";
     const _0xc1 = document.getElementById('canvas'), _0xd2 = _0xc1.getContext('2d', { willReadFrequently: true });
     let _0xe3 = null, _0xf4 = null, _0xa5 = {}, _0xb6 = false, _0xc7 = null, _0xd8 = null;
 
-    // 工具函数
     function _0x1a9() {
         const i = [navigator.userAgent, screen.height, screen.width, navigator.language].join('|');
         let h = 0; for (let j = 0; j < i.length; j++) { h = (h << 5) - h + i.charCodeAt(j); h |= 0; }
@@ -102,79 +102,44 @@
     }
     async function _0x2b8() { try { const r = await fetch('https://api.m.suning.com/showtime.do'); const d = await r.json(); return parseInt(d.sysTime); } catch (e) { return new Date().getTime(); } }
 
-    // 反馈逻辑
-    async function _0xFB() {
-        const t = document.getElementById('fb-text').value;
-        if (!t.trim() || !_db) return alert("配置未完成或内容为空");
-        try { await _db.from('user_feedback').insert([{ content: t }]); alert("✅ 反馈成功！"); document.getElementById('fb-text').value = ""; } catch(e) { alert("网络异常"); }
-    }
-
-    // ✨ 核心激活逻辑：确保点击一定有提示
     async function _0x5a12() {
-        const inputStr = document.getElementById('key-input').value.trim();
-        if (!inputStr) return alert("请输入通行证");
-        if (inputStr === "RESET_ALL_LOCKS") { localStorage.clear(); location.reload(); return; }
-
-        const encodedKey = btoa(inputStr);
-        const deviceID = _0x1a9();
-        const now = await _0x2b8();
-
-        if (_0x7a2.hasOwnProperty(encodedKey)) {
-            const boundID = localStorage.getItem('bind_id_' + encodedKey);
-            if (boundID && boundID !== deviceID) return alert("❌ 该卡密已绑定其他手机");
-
-            let data = JSON.parse(localStorage.getItem('bind_data_' + encodedKey));
-            if (!data) {
-                data = { st: now, dy: _0x7a2[encodedKey] };
-                localStorage.setItem('bind_id_' + encodedKey, deviceID);
-                localStorage.setItem('bind_data_' + encodedKey, JSON.stringify(data));
-            }
-
-            if ((now - data.st) / 864e5 > data.dy) return alert("🚫 授权已到期");
-
-            document.getElementById('auth-overlay').style.display = 'none';
-            localStorage.setItem('u_auth', encodedKey);
-            _0x3c7();
-        } else {
-            alert("❌ 通行证错误");
-        }
+        const v = document.getElementById('key-input').value.trim();
+        if (v === _0x9b3) { if(confirm("重置系统？")) { localStorage.clear(); location.reload(); } return; }
+        const e = btoa(v), d = _0x1a9(), n = await _0x2b8();
+        if (_0xLib.hasOwnProperty(e)) {
+            const b = localStorage.getItem('bind_id_' + e);
+            if (b && b !== d) { alert("设备冲突"); return; }
+            let s = JSON.parse(localStorage.getItem('bind_data_' + e));
+            if (!s) { s = { st: n, dy: _0xLib[e] }; localStorage.setItem('bind_id_' + e, d); localStorage.setItem('bind_data_' + e, JSON.stringify(s)); }
+            if ((n - s.st) / 864e5 > s.dy) { alert("到期"); return; }
+            document.getElementById('auth-overlay').style.display = 'none'; localStorage.setItem('u_auth', e); _0x3c7();
+        } else { alert("无效通行证"); }
     }
 
-    // 初始化渲染
-    function _0xinit() {
+    function _0x3c7() {
+        const w = localStorage.getItem('saved_work'), t = localStorage.getItem('saved_inputs');
+        if (w) _0xa5 = JSON.parse(w);
+        if (t) { const d = JSON.parse(t); for (let k in d) { const el = document.getElementById(k); if (el) el.value = d[k]; } }
+        if (_0xe3) renderAll();
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('dev-id-display').innerText = "ID: " + _0x1a9();
-        
-        // 动态生成输入框
         const mAr = document.getElementById('main-inputs'), eAr = document.getElementById('extra-inputs');
         for(let i=1; i<=6; i++) {
             const h = `<div class="input-item" id="box${i}"><input type="text" id="old${i}" placeholder="参考${i}"><input type="text" id="new${i}" placeholder="修改${i}" oninput="renderAll()"><button class="btn btn-aim" id="aim${i}" onclick="startAim(${i})">瞄准</button><button class="btn btn-lock" id="lock${i}" onclick="lockItem()">确认</button></div>`;
             if(i <= 3) mAr.innerHTML += h; else eAr.innerHTML += h;
         }
-
-        // 绑定按钮事件
-        document.getElementById('login-btn').onclick = _0x5a12;
-
-        // 自动登录检测
-        _0xcheckAuto();
-    }
-
-    async function _0xcheckAuto() {
-        const a = localStorage.getItem('u_auth');
-        if (a && _0x7a2[a]) {
-            const n = await _0x2b8();
+        document.getElementById('_0xbtn').onclick = _0x5a12;
+        const a = localStorage.getItem('u_auth'), n = await _0x2b8();
+        if (a && _0xLib[a] && n) {
             const d = JSON.parse(localStorage.getItem('bind_data_' + a));
             if (localStorage.getItem('bind_id_' + a) === _0x1a9() && (n - d.st) / 864e5 <= d.dy) {
-                document.getElementById('auth-overlay').style.display = 'none';
-                _0x3c7();
+                document.getElementById('auth-overlay').style.display = 'none'; _0x3c7();
             }
         }
-    }
+    });
 
-    // 绘图与操作逻辑
-    function _0xfold() { const e = document.getElementById('extra-inputs'), i = document.getElementById('f-icon'); const isH = e.style.display === 'block'; e.style.display = isH ? 'none' : 'block'; i.innerText = isH ? '展开 ▼' : '收起 ▲'; }
-    function _0x3c7() { const w = localStorage.getItem('saved_work'), t = localStorage.getItem('saved_inputs'); if (w) _0xa5 = JSON.parse(w); if (t) { const d = JSON.parse(t); for (let k in d) { const el = document.getElementById(k); if (el) el.value = d[k]; } } if (_0xe3) renderAll(); }
-    
-    // 浮窗拖拽
     const jy = document.getElementById('float-joy'), hd = document.getElementById('joy-handle');
     let isD = false, of = { x: 0, y: 0 };
     hd.onpointerdown = (e) => { isD = true; of.x = e.clientX - jy.offsetLeft; of.y = e.clientY - jy.offsetTop; hd.setPointerCapture(e.pointerId); };
@@ -212,11 +177,30 @@
         renderAll();
     }
 
-    function lockItem() { _0xf4 = null; document.querySelectorAll('.input-item, .barcode-area').forEach(el => el.classList.remove('active')); document.querySelectorAll('.btn-aim').forEach(btn => btn.classList.remove('active-status')); document.querySelectorAll('.btn-lock').forEach(btn => btn.style.display = 'none'); if (Object.keys(_0xa5).length > 0) { localStorage.setItem('saved_work', JSON.stringify(_0xa5)); const d = {}; document.querySelectorAll('input[type="text"]').forEach(i => d[i.id] = i.value); localStorage.setItem('saved_inputs', JSON.stringify(d)); } renderAll(); }
-    function updateActiveParams() { if (_0xf4 && _0xa5[_0xf4]) { _0xa5[_0xf4].sz = parseInt(document.getElementById('floatSize').value); _0xa5[_0xf4].wt = document.getElementById('floatWeight').value; _0xa5[_0xf4].cl = document.getElementById('floatColor').value; if (String(_0xf4).startsWith('B')) _0xa5[_0xf4].bw = parseFloat(document.getElementById('floatDensity').value); renderAll(); }}
+    function lockItem() { 
+        _0xf4 = null; 
+        document.querySelectorAll('.input-item, .barcode-area').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.btn-aim').forEach(btn => btn.classList.remove('active-status'));
+        document.querySelectorAll('.btn-lock').forEach(btn => btn.style.display = 'none');
+        if (Object.keys(_0xa5).length > 0) {
+            localStorage.setItem('saved_work', JSON.stringify(_0xa5));
+            const d = {}; document.querySelectorAll('input[type="text"]').forEach(i => d[i.id] = i.value);
+            localStorage.setItem('saved_inputs', JSON.stringify(d));
+        }
+        renderAll(); 
+    }
+
+    function updateActiveParams() { if (_0xf4 && _0xa5[_0xf4]) {
+        _0xa5[_0xf4].sz = parseInt(document.getElementById('floatSize').value); _0xa5[_0xf4].wt = document.getElementById('floatWeight').value;
+        _0xa5[_0xf4].cl = document.getElementById('floatColor').value;
+        if (String(_0xf4).startsWith('B')) _0xa5[_0xf4].bw = parseFloat(document.getElementById('floatDensity').value);
+        renderAll();
+    }}
+
     function _0x2b11(v) { document.getElementById('sizeVal').innerText = v; updateActiveParams(); }
     function _0x3c22(v) { document.getElementById('denVal').innerText = v; updateActiveParams(); }
     function _0xsetCl(c) { document.getElementById('floatColor').value = c; updateActiveParams(); }
+
     function renderAll() {
         if (!_0xe3) return; _0xd2.drawImage(_0xe3, 0, 0);
         for (let k in _0xa5) {
@@ -224,24 +208,30 @@
             if (String(k).startsWith('B')) {
                 const v = document.getElementById(k==='B1'?'newBarcode1':'newBarcode2').value; if (!v) continue;
                 const t = document.getElementById('tempCanvas');
-                try { JsBarcode(t, v, { format: "CODE128", lineColor: i.cl, displayValue: false, width: i.bw, height: i.sz }); const p = _0xd2.getImageData(i.x, Math.max(0, i.y-i.sz*0.8-5), 1, 1).data; _0xd2.fillStyle = (p[0]+p[1]+p[2] < 120) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`; _0xd2.fillRect(_0xc1.width*0.05, i.y-i.sz*0.9, _0xc1.width*0.9, i.sz*1.8); _0xd2.drawImage(t, _0xc1.width/2-t.width/2, i.y-t.height/2); } catch(e){}
+                try {
+                    JsBarcode(t, v, { format: "CODE128", lineColor: i.cl, displayValue: false, width: i.bw, height: i.sz });
+                    const p = _0xd2.getImageData(i.x, Math.max(0, i.y-i.sz*0.8-5), 1, 1).data;
+                    _0xd2.fillStyle = (p[0]+p[1]+p[2] < 120) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`;
+                    _0xd2.fillRect(_0xc1.width*0.05, i.y-i.sz*0.9, _0xc1.width*0.9, i.sz*1.8);
+                    _0xd2.drawImage(t, _0xc1.width/2-t.width/2, i.y-t.height/2);
+                } catch(e){}
             } else {
                 const o = document.getElementById('old'+k).value, n = document.getElementById('new'+k).value; if (!n) continue;
                 const r = i.x > _0xc1.width/2; _0xd2.font = `${i.wt} ${i.sz}px sans-serif`; _0xd2.textBaseline = "middle";
-                const tw = _0xd2.measureText(o || n).width * 1.3 + 10; const p = _0xd2.getImageData(i.x-(r?10:0), i.y-i.sz/2-2, 1, 1).data;
-                _0xd2.fillStyle = (p[0]+p[1]+p[2] < 80) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`; _0xd2.fillRect(r?i.x-tw+5:i.x-tw/2, i.y-i.sz*0.7, tw, i.sz*1.4);
+                const tw = _0xd2.measureText(o || n).width * 1.3 + 10;
+                const p = _0xd2.getImageData(i.x-(r?10:0), i.y-i.sz/2-2, 1, 1).data;
+                _0xd2.fillStyle = (p[0]+p[1]+p[2] < 80) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`;
+                _0xd2.fillRect(r?i.x-tw+5:i.x-tw/2, i.y-i.sz*0.7, tw, i.sz*1.4);
                 _0xd2.fillStyle = i.cl; _0xd2.textAlign = r ? "right" : "center"; _0xd2.fillText(n, i.x, i.y);
             }
         }
     }
+
     function _0xmove(d) { if (_0xf4 && _0xa5[_0xf4]) { if(d==='up') _0xa5[_0xf4].y-=1; if(d==='down') _0xa5[_0xf4].y+=1; if(d==='left') _0xa5[_0xf4].x-=1; if(d==='right') _0xa5[_0xf4].x+=1; renderAll(); } }
     function _0xstart(d) { _0xmove(d); _0xc7 = setTimeout(() => { _0xd8 = setInterval(() => _0xmove(d), 45); }, 300); }
     function _0xstop() { clearTimeout(_0xc7); clearInterval(_0xd8); }
-    function resetAll() { if (confirm("确定重置？")) { localStorage.clear(); location.reload(); } }
+    function resetAll() { if (confirm("重置？")) { localStorage.clear(); location.reload(); } }
     function _0xDL() { _0xf4 = null; renderAll(); try { const d = _0xc1.toDataURL("image/png"); const a = document.createElement('a'); a.download = '一棵树_' + new Date().getTime() + '.png'; a.href = d; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(() => { if (confirm("下载失败？请打开预览图长按保存。")) { const w = window.open(); w.document.write('<img src="' + d + '" style="width:100%" />'); } }, 800); } catch (e) { alert("截图保存"); } }
-
-    // 🚀 启动！
-    _0xinit();
 </script>
 </body>
 </html>
