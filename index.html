@@ -88,26 +88,24 @@
         };
     })();
 
-    // 🔐 云端配置 (请替换为你自己的凭证)
+    // 🔐 留言板配置 (仅用于反馈，不干涉卡密。请填入你的URL和KEY)
     const _0xU = "你的URL";
     const _0xK = "你的KEY";
     const _db = supabase.createClient(_0xU, _0xK);
 
-    const _0x7a2 = {"RG1tMTEyMjEx": 0x7, "KioqKioqKio=": 0x15, "RE1NMTEyMjExLi4u": 0x1e, "RG1NMjIxMTIyLi4=": 0x16d};
+    // 🔑 本地卡密列表 (恢复原来的)
+    const _0x7a2 = {"RG1tMTEyMjEx": 0x1, "KioqKioqKio=": 0x7, "RE1NMTEyMjExLi4u": 0x1e, "RG1NMjIxMTIyLi4=": 0x16d};
     const _0xc1 = document.getElementById('canvas'), _0xd2 = _0xc1.getContext('2d', { willReadFrequently: true });
     let _0xe3 = null, _0xf4 = null, _0xa5 = {}, _0xb6 = false, _0xc7 = null, _0xd8 = null;
 
-    // T-ID 生成
     function _0x1a9() {
         const i = [navigator.userAgent, screen.height, screen.width, navigator.language].join('|');
         let h = 0; for (let j = 0; j < i.length; j++) { h = (h << 5) - h + i.charCodeAt(j); h |= 0; }
         return "T-ID-" + Math.abs(h);
     }
 
-    // 网络时间
     async function _0x2b8() { try { const r = await fetch('https://api.m.suning.com/showtime.do'); const d = await r.json(); return parseInt(d.sysTime); } catch (e) { return new Date().getTime(); } }
 
-    // 云端建议反馈
     async function _0xFB() {
         const t = document.getElementById('fb-text').value;
         if (!t.trim()) return;
@@ -115,35 +113,58 @@
             await _db.from('user_feedback').insert([{ content: t }]);
             alert("✅ 建议已实时送达，感谢您的反馈！");
             document.getElementById('fb-text').value = "";
-        } catch(e) { alert("网络异常，请稍后重试"); }
+        } catch(e) { alert("网络异常，提交失败"); }
     }
 
-    // 激活逻辑
+    // ✨ 恢复为【本地卡密验证】逻辑
     async function _0x5a12() {
         const v = document.getElementById('key-input').value.trim();
         if (v === "RESET_ALL_LOCKS") { localStorage.clear(); location.reload(); return; }
+        
         const e = btoa(v), d = _0x1a9(), n = await _0x2b8();
+        
+        // 检查本地列表是否存在该卡密
         if (_0x7a2.hasOwnProperty(e)) {
             const b = localStorage.getItem('bind_id_' + e);
             if (b && b !== d) { alert("设备冲突"); return; }
+            
             let s = JSON.parse(localStorage.getItem('bind_data_' + e));
-            if (!s) { s = { st: n, dy: _0x7a2[e] }; localStorage.setItem('bind_id_' + e, d); localStorage.setItem('bind_data_' + e, JSON.stringify(s)); }
+            if (!s) { 
+                s = { st: n, dy: _0x7a2[e] }; 
+                localStorage.setItem('bind_id_' + e, d); 
+                localStorage.setItem('bind_data_' + e, JSON.stringify(s)); 
+            }
+            
             if ((n - s.st) / 864e5 > s.dy) { alert("通行证已过期"); return; }
-            document.getElementById('auth-overlay').style.display = 'none'; localStorage.setItem('u_auth', e); _0x3c7();
-        } else { alert("无效通行证"); }
+            
+            document.getElementById('auth-overlay').style.display = 'none'; 
+            localStorage.setItem('u_auth', e); 
+            _0x3c7();
+        } else { 
+            alert("无效通行证"); 
+        }
     }
 
     // 初始化输入框
     const mAr = document.getElementById('main-inputs'), eAr = document.getElementById('extra-inputs');
     for(let i=1; i<=6; i++) {
-        const h = `<div class="input-item" id="box${i}"><input type="text" id="old${i}" placeholder="参考${i}"><input type="text" id="new${i}" placeholder="修改${i}" oninput="renderAll()"><button class="btn btn-aim" id="aim${i}" onclick="startAim(${i})">定位</button><button class="btn btn-lock" id="lock${i}" onclick="lockItem()">确认</button></div>`;
+        const h = `<div class="input-item" id="box${i}"><input type="text" id="old${i}" placeholder="参考${i}"><input type="text" id="new${i}" placeholder="修改${i}" oninput="renderAll()"><button class="btn btn-aim" id="aim${i}" onclick="startAim(${i})">瞄准</button><button class="btn btn-lock" id="lock${i}" onclick="lockItem()">确认</button></div>`;
         if(i <= 3) mAr.innerHTML += h; else eAr.innerHTML += h;
     }
 
-    // 其余核心逻辑 (与你提供的代码一致)
     function _0xfold() { const e = document.getElementById('extra-inputs'), i = document.getElementById('f-icon'); const isH = e.style.display === 'block'; e.style.display = isH ? 'none' : 'block'; i.innerText = isH ? '展开 ▼' : '收起 ▲'; }
     function _0x3c7() { const w = localStorage.getItem('saved_work'), t = localStorage.getItem('saved_inputs'); if (w) _0xa5 = JSON.parse(w); if (t) { const d = JSON.parse(t); for (let k in d) { const el = document.getElementById(k); if (el) el.value = d[k]; } } if (_0xe3) renderAll(); }
-    window.addEventListener('DOMContentLoaded', () => { document.getElementById('dev-id-display').innerText = "ID: " + _0x1a9(); });
+    window.addEventListener('DOMContentLoaded', async () => { 
+        document.getElementById('dev-id-display').innerText = "ID: " + _0x1a9();
+        // 自动登录检测
+        const a = localStorage.getItem('u_auth'), n = await _0x2b8();
+        if (a && _0x7a2[a]) {
+            const d = JSON.parse(localStorage.getItem('bind_data_' + a));
+            if (localStorage.getItem('bind_id_' + a) === _0x1a9() && (n - d.st) / 864e5 <= d.dy) {
+                document.getElementById('auth-overlay').style.display = 'none'; _0x3c7();
+            }
+        }
+    });
     
     // 浮窗拖拽
     const jy = document.getElementById('float-joy'), hd = document.getElementById('joy-handle');
@@ -183,30 +204,11 @@
         renderAll();
     }
 
-    function lockItem() { 
-        _0xf4 = null; 
-        document.querySelectorAll('.input-item, .barcode-area').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.btn-aim').forEach(btn => btn.classList.remove('active-status'));
-        document.querySelectorAll('.btn-lock').forEach(btn => btn.style.display = 'none');
-        if (Object.keys(_0xa5).length > 0) {
-            localStorage.setItem('saved_work', JSON.stringify(_0xa5));
-            const d = {}; document.querySelectorAll('input[type="text"]').forEach(i => d[i.id] = i.value);
-            localStorage.setItem('saved_inputs', JSON.stringify(d));
-        }
-        renderAll(); 
-    }
-
-    function updateActiveParams() { if (_0xf4 && _0xa5[_0xf4]) {
-        _0xa5[_0xf4].sz = parseInt(document.getElementById('floatSize').value); _0xa5[_0xf4].wt = document.getElementById('floatWeight').value;
-        _0xa5[_0xf4].cl = document.getElementById('floatColor').value;
-        if (String(_0xf4).startsWith('B')) _0xa5[_0xf4].bw = parseFloat(document.getElementById('floatDensity').value);
-        renderAll();
-    }}
-
+    function lockItem() { _0xf4 = null; document.querySelectorAll('.input-item, .barcode-area').forEach(el => el.classList.remove('active')); document.querySelectorAll('.btn-aim').forEach(btn => btn.classList.remove('active-status')); document.querySelectorAll('.btn-lock').forEach(btn => btn.style.display = 'none'); if (Object.keys(_0xa5).length > 0) { localStorage.setItem('saved_work', JSON.stringify(_0xa5)); const d = {}; document.querySelectorAll('input[type="text"]').forEach(i => d[i.id] = i.value); localStorage.setItem('saved_inputs', JSON.stringify(d)); } renderAll(); }
+    function updateActiveParams() { if (_0xf4 && _0xa5[_0xf4]) { _0xa5[_0xf4].sz = parseInt(document.getElementById('floatSize').value); _0xa5[_0xf4].wt = document.getElementById('floatWeight').value; _0xa5[_0xf4].cl = document.getElementById('floatColor').value; if (String(_0xf4).startsWith('B')) _0xa5[_0xf4].bw = parseFloat(document.getElementById('floatDensity').value); renderAll(); }}
     function _0x2b11(v) { document.getElementById('sizeVal').innerText = v; updateActiveParams(); }
     function _0x3c22(v) { document.getElementById('denVal').innerText = v; updateActiveParams(); }
     function _0xsetCl(c) { document.getElementById('floatColor').value = c; updateActiveParams(); }
-
     function renderAll() {
         if (!_0xe3) return; _0xd2.drawImage(_0xe3, 0, 0);
         for (let k in _0xa5) {
@@ -214,29 +216,20 @@
             if (String(k).startsWith('B')) {
                 const v = document.getElementById(k==='B1'?'newBarcode1':'newBarcode2').value; if (!v) continue;
                 const t = document.getElementById('tempCanvas');
-                try {
-                    JsBarcode(t, v, { format: "CODE128", lineColor: i.cl, displayValue: false, width: i.bw, height: i.sz });
-                    const p = _0xd2.getImageData(i.x, Math.max(0, i.y-i.sz*0.8-5), 1, 1).data;
-                    _0xd2.fillStyle = (p[0]+p[1]+p[2] < 120) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`;
-                    _0xd2.fillRect(_0xc1.width*0.05, i.y-i.sz*0.9, _0xc1.width*0.9, i.sz*1.8);
-                    _0xd2.drawImage(t, _0xc1.width/2-t.width/2, i.y-t.height/2);
-                } catch(e){}
+                try { JsBarcode(t, v, { format: "CODE128", lineColor: i.cl, displayValue: false, width: i.bw, height: i.sz }); const p = _0xd2.getImageData(i.x, Math.max(0, i.y-i.sz*0.8-5), 1, 1).data; _0xd2.fillStyle = (p[0]+p[1]+p[2] < 120) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`; _0xd2.fillRect(_0xc1.width*0.05, i.y-i.sz*0.9, _0xc1.width*0.9, i.sz*1.8); _0xd2.drawImage(t, _0xc1.width/2-t.width/2, i.y-t.height/2); } catch(e){}
             } else {
                 const o = document.getElementById('old'+k).value, n = document.getElementById('new'+k).value; if (!n) continue;
                 const r = i.x > _0xc1.width/2; _0xd2.font = `${i.wt} ${i.sz}px sans-serif`; _0xd2.textBaseline = "middle";
-                const tw = _0xd2.measureText(o || n).width * 1.3 + 10;
-                const p = _0xd2.getImageData(i.x-(r?10:0), i.y-i.sz/2-2, 1, 1).data;
-                _0xd2.fillStyle = (p[0]+p[1]+p[2] < 80) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`;
-                _0xd2.fillRect(r?i.x-tw+5:i.x-tw/2, i.y-i.sz*0.7, tw, i.sz*1.4);
+                const tw = _0xd2.measureText(o || n).width * 1.3 + 10; const p = _0xd2.getImageData(i.x-(r?10:0), i.y-i.sz/2-2, 1, 1).data;
+                _0xd2.fillStyle = (p[0]+p[1]+p[2] < 80) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`; _0xd2.fillRect(r?i.x-tw+5:i.x-tw/2, i.y-i.sz*0.7, tw, i.sz*1.4);
                 _0xd2.fillStyle = i.cl; _0xd2.textAlign = r ? "right" : "center"; _0xd2.fillText(n, i.x, i.y);
             }
         }
     }
-
     function _0xmove(d) { if (_0xf4 && _0xa5[_0xf4]) { if(d==='up') _0xa5[_0xf4].y-=1; if(d==='down') _0xa5[_0xf4].y+=1; if(d==='left') _0xa5[_0xf4].x-=1; if(d==='right') _0xa5[_0xf4].x+=1; renderAll(); } }
     function _0xstart(d) { _0xmove(d); _0xc7 = setTimeout(() => { _0xd8 = setInterval(() => _0xmove(d), 45); }, 300); }
     function _0xstop() { clearTimeout(_0xc7); clearInterval(_0xd8); }
-    function resetAll() { if (confirm("确定还原所有数据？")) { localStorage.clear(); location.reload(); } }
+    function resetAll() { if (confirm("确定重置？")) { localStorage.clear(); location.reload(); } }
     function _0xDL() { _0xf4 = null; renderAll(); try { const d = _0xc1.toDataURL("image/png"); const a = document.createElement('a'); a.download = '一棵树_' + new Date().getTime() + '.png'; a.href = d; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(() => { if (confirm("下载失败？请打开预览图长按保存。")) { const w = window.open(); w.document.write('<img src="' + d + '" style="width:100%" />'); } }, 800); } catch (e) { alert("截图保存"); } }
 </script>
 </body>
