@@ -31,13 +31,13 @@
         #auth-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f0f2f5; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
     </style>
 </head>
-<body ontouchstart="">
+<body>
 
 <div id="auth-overlay">
     <div style="background:white; padding:30px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1); width:100%; max-width:350px; text-align:center;">
         <h2 style="margin:0 0 10px; color:#333;">一棵树</h2>
         <input type="text" id="key-input" placeholder="输入通行证" style="width:100%; padding:15px; border:2px solid #ddd; border-radius:10px; font-size:16px; margin-bottom:15px; outline:none; box-sizing:border-box;">
-        <button onclick="_0x5a12()" style="width:100%; background:#007aff; color:white; border:none; padding:15px; border-radius:10px; font-size:16px; font-weight:bold;">进入系统</button>
+        <button id="login-btn" style="width:100%; background:#007aff; color:white; border:none; padding:15px; border-radius:10px; font-size:16px; font-weight:bold; cursor:pointer;">进入系统</button>
         <p id="dev-id-display" style="margin-top:15px; font-size:9px; color:#ccc;"></p>
     </div>
 </div>
@@ -57,7 +57,7 @@
 
 <div class="feedback-box">
     <h4 style="font-size:13px; margin-bottom:8px;">💡 改进建议</h4>
-    <textarea id="fb-text" placeholder="写下您的建议，我们将实时收到..."></textarea>
+    <textarea id="fb-text" placeholder="写下您的建议..."></textarea>
     <button onclick="_0xFB()" style="margin-top:8px; width:100%; background:#007aff; color:white; border:none; padding:8px; border-radius:6px; font-size:12px;">提交建议</button>
 </div>
 
@@ -78,93 +78,101 @@
 </div>
 
 <script>
-    // 🛡️ 核心自卫逻辑：无限 Debugger 陷阱
+    // 🛡️ 防调试保护
     (function(){
         function _0xdet(){try{(function(){return false}['constructor']('debugger')['call']())}catch(e){}}
-        setInterval(_0xdet, 50);
+        setInterval(_0xdet, 100);
         document.oncontextmenu = () => false;
-        document.onkeydown = (e) => {
-            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) return false;
-        };
     })();
 
-    // 🔐 留言板配置 (仅用于反馈，不干涉卡密。请填入你的URL和KEY)
+    // 🔐 配置
     const _0xU = "你的URL";
     const _0xK = "你的KEY";
-    const _db = supabase.createClient(_0xU, _0xK);
+    const _db = (typeof supabase !== 'undefined') ? supabase.createClient(_0xU, _0xK) : null;
+    const _0x7a2 = {"RG1tMTEyMjEx": 1, "KioqKioqKio=": 7, "RE1NMTEyMjExLi4u": 30, "RG1NMjIxMTIyLi4=": 365};
 
-    // 🔑 本地卡密列表 (恢复原来的)
-    const _0x7a2 = {"RG1tMTEyMjEx": 0x1, "KioqKioqKio=": 0x7, "RE1NMTEyMjExLi4u": 0x1e, "RG1NMjIxMTIyLi4=": 0x16d};
     const _0xc1 = document.getElementById('canvas'), _0xd2 = _0xc1.getContext('2d', { willReadFrequently: true });
     let _0xe3 = null, _0xf4 = null, _0xa5 = {}, _0xb6 = false, _0xc7 = null, _0xd8 = null;
 
+    // 工具函数
     function _0x1a9() {
         const i = [navigator.userAgent, screen.height, screen.width, navigator.language].join('|');
         let h = 0; for (let j = 0; j < i.length; j++) { h = (h << 5) - h + i.charCodeAt(j); h |= 0; }
         return "T-ID-" + Math.abs(h);
     }
-
     async function _0x2b8() { try { const r = await fetch('https://api.m.suning.com/showtime.do'); const d = await r.json(); return parseInt(d.sysTime); } catch (e) { return new Date().getTime(); } }
 
+    // 反馈逻辑
     async function _0xFB() {
         const t = document.getElementById('fb-text').value;
-        if (!t.trim()) return;
-        try {
-            await _db.from('user_feedback').insert([{ content: t }]);
-            alert("✅ 建议已实时送达，感谢您的反馈！");
-            document.getElementById('fb-text').value = "";
-        } catch(e) { alert("网络异常，提交失败"); }
+        if (!t.trim() || !_db) return alert("配置未完成或内容为空");
+        try { await _db.from('user_feedback').insert([{ content: t }]); alert("✅ 反馈成功！"); document.getElementById('fb-text').value = ""; } catch(e) { alert("网络异常"); }
     }
 
-    // ✨ 恢复为【本地卡密验证】逻辑
+    // ✨ 核心激活逻辑：确保点击一定有提示
     async function _0x5a12() {
-        const v = document.getElementById('key-input').value.trim();
-        if (v === "RESET_ALL_LOCKS") { localStorage.clear(); location.reload(); return; }
-        
-        const e = btoa(v), d = _0x1a9(), n = await _0x2b8();
-        
-        // 检查本地列表是否存在该卡密
-        if (_0x7a2.hasOwnProperty(e)) {
-            const b = localStorage.getItem('bind_id_' + e);
-            if (b && b !== d) { alert("设备冲突"); return; }
-            
-            let s = JSON.parse(localStorage.getItem('bind_data_' + e));
-            if (!s) { 
-                s = { st: n, dy: _0x7a2[e] }; 
-                localStorage.setItem('bind_id_' + e, d); 
-                localStorage.setItem('bind_data_' + e, JSON.stringify(s)); 
+        const inputStr = document.getElementById('key-input').value.trim();
+        if (!inputStr) return alert("请输入通行证");
+        if (inputStr === "RESET_ALL_LOCKS") { localStorage.clear(); location.reload(); return; }
+
+        const encodedKey = btoa(inputStr);
+        const deviceID = _0x1a9();
+        const now = await _0x2b8();
+
+        if (_0x7a2.hasOwnProperty(encodedKey)) {
+            const boundID = localStorage.getItem('bind_id_' + encodedKey);
+            if (boundID && boundID !== deviceID) return alert("❌ 该卡密已绑定其他手机");
+
+            let data = JSON.parse(localStorage.getItem('bind_data_' + encodedKey));
+            if (!data) {
+                data = { st: now, dy: _0x7a2[encodedKey] };
+                localStorage.setItem('bind_id_' + encodedKey, deviceID);
+                localStorage.setItem('bind_data_' + encodedKey, JSON.stringify(data));
             }
-            
-            if ((n - s.st) / 864e5 > s.dy) { alert("通行证已过期"); return; }
-            
-            document.getElementById('auth-overlay').style.display = 'none'; 
-            localStorage.setItem('u_auth', e); 
+
+            if ((now - data.st) / 864e5 > data.dy) return alert("🚫 授权已到期");
+
+            document.getElementById('auth-overlay').style.display = 'none';
+            localStorage.setItem('u_auth', encodedKey);
             _0x3c7();
-        } else { 
-            alert("无效通行证"); 
+        } else {
+            alert("❌ 通行证错误");
         }
     }
 
-    // 初始化输入框
-    const mAr = document.getElementById('main-inputs'), eAr = document.getElementById('extra-inputs');
-    for(let i=1; i<=6; i++) {
-        const h = `<div class="input-item" id="box${i}"><input type="text" id="old${i}" placeholder="参考${i}"><input type="text" id="new${i}" placeholder="修改${i}" oninput="renderAll()"><button class="btn btn-aim" id="aim${i}" onclick="startAim(${i})">瞄准</button><button class="btn btn-lock" id="lock${i}" onclick="lockItem()">确认</button></div>`;
-        if(i <= 3) mAr.innerHTML += h; else eAr.innerHTML += h;
+    // 初始化渲染
+    function _0xinit() {
+        document.getElementById('dev-id-display').innerText = "ID: " + _0x1a9();
+        
+        // 动态生成输入框
+        const mAr = document.getElementById('main-inputs'), eAr = document.getElementById('extra-inputs');
+        for(let i=1; i<=6; i++) {
+            const h = `<div class="input-item" id="box${i}"><input type="text" id="old${i}" placeholder="参考${i}"><input type="text" id="new${i}" placeholder="修改${i}" oninput="renderAll()"><button class="btn btn-aim" id="aim${i}" onclick="startAim(${i})">瞄准</button><button class="btn btn-lock" id="lock${i}" onclick="lockItem()">确认</button></div>`;
+            if(i <= 3) mAr.innerHTML += h; else eAr.innerHTML += h;
+        }
+
+        // 绑定按钮事件
+        document.getElementById('login-btn').onclick = _0x5a12;
+
+        // 自动登录检测
+        _0xcheckAuto();
     }
 
-    function _0xfold() { const e = document.getElementById('extra-inputs'), i = document.getElementById('f-icon'); const isH = e.style.display === 'block'; e.style.display = isH ? 'none' : 'block'; i.innerText = isH ? '展开 ▼' : '收起 ▲'; }
-    function _0x3c7() { const w = localStorage.getItem('saved_work'), t = localStorage.getItem('saved_inputs'); if (w) _0xa5 = JSON.parse(w); if (t) { const d = JSON.parse(t); for (let k in d) { const el = document.getElementById(k); if (el) el.value = d[k]; } } if (_0xe3) renderAll(); }
-    window.addEventListener('DOMContentLoaded', async () => { 
-        document.getElementById('dev-id-display').innerText = "ID: " + _0x1a9();
-        // 自动登录检测
-        const a = localStorage.getItem('u_auth'), n = await _0x2b8();
+    async function _0xcheckAuto() {
+        const a = localStorage.getItem('u_auth');
         if (a && _0x7a2[a]) {
+            const n = await _0x2b8();
             const d = JSON.parse(localStorage.getItem('bind_data_' + a));
             if (localStorage.getItem('bind_id_' + a) === _0x1a9() && (n - d.st) / 864e5 <= d.dy) {
-                document.getElementById('auth-overlay').style.display = 'none'; _0x3c7();
+                document.getElementById('auth-overlay').style.display = 'none';
+                _0x3c7();
             }
         }
-    });
+    }
+
+    // 绘图与操作逻辑
+    function _0xfold() { const e = document.getElementById('extra-inputs'), i = document.getElementById('f-icon'); const isH = e.style.display === 'block'; e.style.display = isH ? 'none' : 'block'; i.innerText = isH ? '展开 ▼' : '收起 ▲'; }
+    function _0x3c7() { const w = localStorage.getItem('saved_work'), t = localStorage.getItem('saved_inputs'); if (w) _0xa5 = JSON.parse(w); if (t) { const d = JSON.parse(t); for (let k in d) { const el = document.getElementById(k); if (el) el.value = d[k]; } } if (_0xe3) renderAll(); }
     
     // 浮窗拖拽
     const jy = document.getElementById('float-joy'), hd = document.getElementById('joy-handle');
@@ -231,6 +239,9 @@
     function _0xstop() { clearTimeout(_0xc7); clearInterval(_0xd8); }
     function resetAll() { if (confirm("确定重置？")) { localStorage.clear(); location.reload(); } }
     function _0xDL() { _0xf4 = null; renderAll(); try { const d = _0xc1.toDataURL("image/png"); const a = document.createElement('a'); a.download = '一棵树_' + new Date().getTime() + '.png'; a.href = d; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(() => { if (confirm("下载失败？请打开预览图长按保存。")) { const w = window.open(); w.document.write('<img src="' + d + '" style="width:100%" />'); } }, 800); } catch (e) { alert("截图保存"); } }
+
+    // 🚀 启动！
+    _0xinit();
 </script>
 </body>
 </html>
