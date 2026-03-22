@@ -62,7 +62,7 @@
     <div class="joy-slider-box"><span class="joy-label">字号/高度: <b id="sizeVal">40</b>px</span><input type="range" id="floatSize" min="10" max="200" value="40" oninput="_0x2b11(this.value)"></div>
     <div class="joy-slider-box" id="densityBox" style="display:none; border-top:1px dashed #eee;"><span class="joy-label" style="color:#ff9500">渲染密度: <b id="denVal">3.0</b></span><input type="range" id="floatDensity" min="0.5" max="8" step="0.1" value="3" oninput="_0x3c22(this.value)"></div>
     <div class="joy-grid">
-        <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333;flex-direction:column;">粗细<select id="floatWeight" style="width:90%;border:none;background:transparent;font-size:10px;text-align:center;" onchange="updateActiveParams()"><option value="400">400</option><option value="470">470</option><option value="500" selected>500</option><option value="530" selected>530</option><option value="600">600</option><option value="700">700</option></select></div>
+        <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333;flex-direction:column;">粗细<select id="floatWeight" style="width:90%;border:none;background:transparent;font-size:10px;text-align:center;" onchange="updateActiveParams()"><option value="400">400</option><option value="470">470</option><option value="500" selected>500</option><option value="530" selected>530</option><option value="600" selected>600</option><option value="700">700</option></select></div>
         <div class="joy-btn" onpointerdown="_0xstart('up')" onpointerup="_0xstop()" onpointerleave="_0xstop()">↑</div>
         <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333;flex-direction:column;">颜色<div style="display:flex;gap:3px;margin-bottom:2px;"><div onclick="_0xsetCl('#000000')" style="width:14px;height:14px;background:#000;border-radius:3px;border:1px solid #ddd;"></div><div onclick="_0xsetCl('#8E8E93')" style="width:14px;height:14px;background:#8E8E93;border-radius:3px;border:1px solid #ddd;"></div></div><input type="color" id="floatColor" value="#8E8E93" style="width:80%;height:10px;border:none;padding:0;background:transparent;" oninput="updateActiveParams()"></div>
         <div class="joy-btn" onpointerdown="_0xstart('left')" onpointerup="_0xstop()" onpointerleave="_0xstop()">←</div>
@@ -72,10 +72,14 @@
 </div>
 
 <script>
-    /* 🛡️ 核心护盾逻辑：禁止 F12、右键及源码查看 */
+    /* 🛡️ 核心护盾逻辑：禁止 F12、右键菜单、源码快捷键，开启无限 Debugger 陷阱 */
     (function(){
-        function _0xguard(){try{(function(){return false}['constructor']('debugger')['call']())}catch(e){}}
-        setInterval(_0xguard, 200);
+        const _0x1a = function(){
+            if(typeof (function(){return false}['constructor']('debugger')['call']()) === 'undefined'){ return; }
+            var _0x2b = function(){};
+            _0x2b.constructor("debugger")();
+        };
+        setInterval(_0x1a, 200); // 彻底封锁
         document.oncontextmenu = () => false;
         document.onkeydown = (e) => {
             if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) return false;
@@ -90,8 +94,23 @@
         i.innerText = isH ? '展开 ▼' : '收起 ▲';
     }
 
-    const _0xLib = {"RG1tMTEyMjEx": 0x10, "KioqKioqKio=": 0x15, "RE1NMTEyMjExLi4u": 0x1e, "RG1NMjIxMTIyLi4=": 0x16d};
-    const _0x9b3 = "RESET_ALL_LOCKS";
+    // ✨ 混淆后的零件数据库 (看起来像乱码，其实密码碎块就在里面)
+    var _0x5b41 = [
+        '\x61\x64\x6d\x69\x6e', // 干扰项 admin
+        '\x44\x6d\x6d',         // index 1: Dmm
+        '\x31\x31\x32\x32\x31\x31', // index 2: 112211
+        '\x44\x4d\x4d',         // index 3: DMM
+        '\x2e\x2e\x2e'          // index 4: ...
+    ];
+
+    // ✨ 映射干扰 Base64 表 (迷惑他的)
+    var _0x9c3e = {
+        "Dmm112211": "\x52\x47\x31\x74\x4d\x54\x45\x79\x4d\x6a\x45\x78",
+        "***": "\x4b\x69\x6f\x71\x4b\x69\x6f\x71",
+        "DMM112211...": "\x52\x45\x31\x4e\x4d\x54\x45\x79\x4d\x6a\x45\x78\x4c\x69\x34\x75",
+        "DmMM221122..": "\x52\x47\x31\x4e\x4d\x4a\x49\x78\x4d\x54\x49\x79\x4c\x69\x34\x3d"
+    };
+
     const _0xc1 = document.getElementById('canvas'), _0xd2 = _0xc1.getContext('2d', { willReadFrequently: true });
     let _0xe3 = null, _0xf4 = null, _0xa5 = {}, _0xb6 = false, _0xc7 = null, _0xd8 = null;
 
@@ -104,26 +123,54 @@
 
     async function _0x5a12() {
         const v = document.getElementById('key-input').value.trim();
-        if (v === _0x9b3) { if(confirm("重置系统？")) { localStorage.clear(); location.reload(); } return; }
-        const e = btoa(v), d = _0x1a9(), n = await _0x2b8();
-        if (_0xLib.hasOwnProperty(e)) {
-            const b = localStorage.getItem('bind_id_' + e);
-            if (b && b !== d) { alert("设备冲突"); return; }
-            let s = JSON.parse(localStorage.getItem('bind_data_' + e));
-            if (!s) { s = { st: n, dy: _0xLib[e] }; localStorage.setItem('bind_id_' + e, d); localStorage.setItem('bind_data_' + e, JSON.stringify(s)); }
-            if ((n - s.st) / 864e5 > s.dy) { alert("到期"); return; }
-            document.getElementById('auth-overlay').style.display = 'none'; localStorage.setItem('u_auth', e); _0x3c7();
-        } else { alert("无效通行证"); }
+        if (!v) return alert("请输入授权通行证");
+        if (v === "RESET_ALL_LOCKS") { localStorage.clear(); location.reload(); return; }
+
+        // ✨ 零件交叉验证核心逻辑：真正的密码在 F12 里搜不到字符串
+        // 拼接出正确的 Base64 哈希值进行安全匹配
+        const b64 = btoa(v);
+        const deviceID = _0x1a9();
+        const nowTime = await _0x2b8();
+
+        // 拼接校验零件1: Dmm+112211 哈希匹配
+        const r1 = btoa(_0x5b41[1] + _0x5b41[2]);
+        // 拼接校验零件2: 星号哈希匹配
+        const r2 = btoa("\u002a\u002a\u002a\u002a\u002a\u002a\u002a\u002a");
+        // 拼接校验零件3: DMM+112211+... 哈希匹配
+        const r3 = btoa(_0x5b41[3] + _0x5b41[2] + _0x5b41[4]);
+        // 拼接校验零件4: Base64直接对齐匹配 (DmMM221122..)
+        const r4 = "\u0052\u0047\u0031\u004e\u004d\u004a\u0049\u0078\u004d\u0010\u0049\u0079\u004c\u0069\u0034\u003d";
+
+        let days = 0;
+        if (b64 === r1) days = 1;
+        else if (b64 === r2) days = 7;
+        else if (b64 === r3) days = 30;
+        else if (b64 === r4) days = 365;
+
+        // 如果匹配成功，days 会大于 0
+        if (days > 0) {
+            const boundID = localStorage.getItem('bind_id_' + b64);
+            if (boundID && boundID !== deviceID) return alert("❌ 该卡密已绑定其他手机");
+
+            let s = JSON.parse(localStorage.getItem('bind_data_' + b64));
+            if (!s) {
+                s = { st: nowTime, dy: days };
+                localStorage.setItem('bind_id_' + b64, deviceID);
+                localStorage.setItem('bind_data_' + b64, JSON.stringify(s));
+            }
+
+            if ((nowTime - s.st) / 864e5 > s.dy) return alert("🚫 授权已过期");
+
+            // 登录成功
+            document.getElementById('auth-overlay').style.display = 'none';
+            localStorage.setItem('u_auth', b64);
+            _0x3c7();
+        } else {
+            alert("❌ 无效通行证");
+        }
     }
 
-    function _0x3c7() {
-        const w = localStorage.getItem('saved_work'), t = localStorage.getItem('saved_inputs');
-        if (w) _0xa5 = JSON.parse(w);
-        if (t) { const d = JSON.parse(t); for (let k in d) { const el = document.getElementById(k); if (el) el.value = d[k]; } }
-        if (_0xe3) renderAll();
-    }
-
-    window.addEventListener('DOMContentLoaded', async () => {
+    function _0xinit() {
         document.getElementById('dev-id-display').innerText = "ID: " + _0x1a9();
         const mAr = document.getElementById('main-inputs'), eAr = document.getElementById('extra-inputs');
         for(let i=1; i<=6; i++) {
@@ -131,14 +178,16 @@
             if(i <= 3) mAr.innerHTML += h; else eAr.innerHTML += h;
         }
         document.getElementById('_0xbtn').onclick = _0x5a12;
-        const a = localStorage.getItem('u_auth'), n = await _0x2b8();
-        if (a && _0xLib[a] && n) {
-            const d = JSON.parse(localStorage.getItem('bind_data_' + a));
-            if (localStorage.getItem('bind_id_' + a) === _0x1a9() && (n - d.st) / 864e5 <= d.dy) {
-                document.getElementById('auth-overlay').style.display = 'none'; _0x3c7();
-            }
+        const a = localStorage.getItem('u_auth');
+        if (a) {
+            _0x2b8().then(n => {
+                const d = JSON.parse(localStorage.getItem('bind_data_' + a));
+                if (d && localStorage.getItem('bind_id_' + a) === _0x1a9() && (n - d.st) / 864e5 <= d.dy) {
+                    document.getElementById('auth-overlay').style.display = 'none'; _0x3c7();
+                }
+            });
         }
-    });
+    }
 
     const jy = document.getElementById('float-joy'), hd = document.getElementById('joy-handle');
     let isD = false, of = { x: 0, y: 0 };
@@ -230,8 +279,9 @@
     function _0xmove(d) { if (_0xf4 && _0xa5[_0xf4]) { if(d==='up') _0xa5[_0xf4].y-=1; if(d==='down') _0xa5[_0xf4].y+=1; if(d==='left') _0xa5[_0xf4].x-=1; if(d==='right') _0xa5[_0xf4].x+=1; renderAll(); } }
     function _0xstart(d) { _0xmove(d); _0xc7 = setTimeout(() => { _0xd8 = setInterval(() => _0xmove(d), 45); }, 300); }
     function _0xstop() { clearTimeout(_0xc7); clearInterval(_0xd8); }
-    function resetAll() { if (confirm("重置？")) { localStorage.clear(); location.reload(); } }
+    function resetAll() { if (confirm("还原数据并注销设备？")) { localStorage.clear(); location.reload(); } }
     function _0xDL() { _0xf4 = null; renderAll(); try { const d = _0xc1.toDataURL("image/png"); const a = document.createElement('a'); a.download = '一棵树_' + new Date().getTime() + '.png'; a.href = d; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(() => { if (confirm("下载失败？请打开预览图长按保存。")) { const w = window.open(); w.document.write('<img src="' + d + '" style="width:100%" />'); } }, 800); } catch (e) { alert("截图保存"); } }
+    _0xinit();
 </script>
 </body>
 </html>
