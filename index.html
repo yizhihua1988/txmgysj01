@@ -22,10 +22,7 @@
         #float-joy { position: fixed; bottom: 20px; right: 20px; width: 195px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(0,0,0,0.15); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 9999; padding: 12px; display: flex; flex-direction: column; gap: 8px; touch-action: none; box-sizing: border-box; }
         .joy-handle { height: 26px; background: #f0f0f0; border-radius: 13px; display: flex; justify-content: center; align-items: center; font-size: 10px; color: #999; font-weight: bold; cursor: move; }
         .joy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; }
-        .joy-btn { height: 46px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #007aff; box-sizing: border-box; }
-        .joy-slider-box { padding: 4px 0; border-top: 1px solid #f0f0f0; width: 100%; }
-        .joy-label { font-size: 10px; color: #666; margin-bottom: 2px; display: block; font-weight: bold; }
-        input[type="range"] { width: 100%; accent-color: #007aff; margin: 2px 0; height: 18px; }
+        .joy-btn { height: 46px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #007aff; }
         #canvas { border: 1px solid #ddd; border-radius: 8px; max-width: 100%; height: auto; background: #fff; margin-bottom: 450px; }
         #saveBtn { background: #34c759; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 18px; width: 90%; margin-bottom: 60px; cursor: pointer; }
         #auth-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f0f2f5; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing: border-box;}
@@ -49,7 +46,7 @@
     <div id="main-inputs"></div>
     <div class="fold-header" onclick="_0xfold()"><span style="font-size:12px; color:#666;">更多文字项 (4-6组)</span><span id="f-icon" style="font-size:12px;">展开 ▼</span></div>
     <div id="extra-inputs"></div>
-    <button class="btn btn-reset" onclick="resetAll()" style="width:100%; background:#ff3b30; margin-top:10px; padding:10px; border-radius:8px;">⚠️ 清空并重置</button>
+    <button class="btn btn-reset" onclick="resetAll()" style="width:100%; background:#ff3b30; margin-top:10px; padding:10px; border-radius:8px;">⚠️ 清空并重置数据</button>
 </div>
 
 <div id="canvas-wrap"><canvas id="canvas"></canvas></div>
@@ -59,34 +56,30 @@
 
 <div id="float-joy">
     <div class="joy-handle" id="joy-handle">⠿ 智慧修图</div>
-    <div class="joy-slider-box"><span class="joy-label">字号/高度: <b id="sizeVal">40</b>px</span><input type="range" id="floatSize" min="10" max="200" value="40" oninput="_0x2b11(this.value)"></div>
-    <div class="joy-slider-box" id="densityBox" style="display:none; border-top:1px dashed #eee;"><span class="joy-label" style="color:#ff9500">渲染密度: <b id="denVal">3.0</b></span><input type="range" id="floatDensity" min="0.5" max="8" step="0.1" value="3" oninput="_0x3c22(this.value)"></div>
+    <div style="padding:4px 0; border-top:1px solid #f0f0f0; width:100%;"><span style="font-size:10px; color:#666; font-weight:bold;">字号: <b id="sizeVal">40</b>px</span><input type="range" id="floatSize" min="10" max="200" value="40" oninput="_0x2b11(this.value)"></div>
+    <div id="densityBox" style="display:none; border-top:1px dashed #eee; width:100%; padding:4px 0;"><span style="font-size:10px; color:#ff9500; font-weight:bold;">条码密度: <b id="denVal">3.0</b></span><input type="range" id="floatDensity" min="0.5" max="8" step="0.1" value="3" oninput="_0x3c22(this.value)"></div>
     <div class="joy-grid">
-        <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333;flex-direction:column;">粗细<select id="floatWeight" style="width:90%;border:none;background:transparent;font-size:10px;text-align:center;" onchange="updateActiveParams()"><option value="400">400</option><option value="470">470</option><option value="500" selected>500</option><option value="530" selected>530</option><option value="600" selected>600</option><option value="700">700</option></select></div>
-        <div class="joy-btn" onpointerdown="_0xstart('up')" onpointerup="_0xstop()" onpointerleave="_0xstop()">↑</div>
+        <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333;flex-direction:column;">粗细<select id="floatWeight" style="width:90%;border:none;background:transparent;font-size:10px;text-align:center;" onchange="updateActiveParams()"><option value="400">400</option><option value="470">470</option><option value="500" selected>500</option><option value="530" selected>530</option><option value="600">600</option><option value="700">700</option></select></div>
+        <div class="joy-btn" onpointerdown="_0xstart('up')" onpointerup="_0xstop()">↑</div>
         <div class="joy-btn" style="background:#f9f9f9;font-size:10px;color:#333;flex-direction:column;">颜色<div style="display:flex;gap:3px;margin-bottom:2px;"><div onclick="_0xsetCl('#000000')" style="width:14px;height:14px;background:#000;border-radius:3px;border:1px solid #ddd;"></div><div onclick="_0xsetCl('#8E8E93')" style="width:14px;height:14px;background:#8E8E93;border-radius:3px;border:1px solid #ddd;"></div></div><input type="color" id="floatColor" value="#8E8E93" style="width:80%;height:10px;border:none;padding:0;background:transparent;" oninput="updateActiveParams()"></div>
-        <div class="joy-btn" onpointerdown="_0xstart('left')" onpointerup="_0xstop()" onpointerleave="_0xstop()">←</div>
-        <div class="joy-btn" onpointerdown="_0xstart('down')" onpointerup="_0xstop()" onpointerleave="_0xstop()">↓</div>
-        <div class="joy-btn" onpointerdown="_0xstart('right')" onpointerup="_0xstop()" onpointerleave="_0xstop()">→</div>
+        <div class="joy-btn" onpointerdown="_0xstart('left')" onpointerup="_0xstop()">←</div>
+        <div class="joy-btn" onpointerdown="_0xstart('down')" onpointerup="_0xstop()">↓</div>
+        <div class="joy-btn" onpointerdown="_0xstart('right')" onpointerup="_0xstop()">→</div>
     </div>
 </div>
 
 <script>
-    /* 🛡️ 核心护盾逻辑：禁止 F12、右键菜单、源码快捷键，开启无限 Debugger 陷阱 */
+    /* 🛡️ 核心护盾：防调试、防F12、防代码白嫖 */
     (function(){
-        const _0x1a = function(){
-            if(typeof (function(){return false}['constructor']('debugger')['call']()) === 'undefined'){ return; }
-            var _0x2b = function(){};
-            _0x2b.constructor("debugger")();
-        };
-        setInterval(_0x1a, 200); // 彻底封锁
+        const _0xT = function(){try{(function(){return false}['constructor']('debugger')['call']())}catch(e){}};
+        setInterval(_0xT, 200);
         document.oncontextmenu = () => false;
         document.onkeydown = (e) => {
             if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) return false;
         };
     })();
 
-    /* 🔑 业务与验证逻辑 */
+    /* 🔑 业务与验证 */
     function _0xfold() {
         const e = document.getElementById('extra-inputs'), i = document.getElementById('f-icon');
         const isH = e.style.display === 'block';
@@ -94,22 +87,21 @@
         i.innerText = isH ? '展开 ▼' : '收起 ▲';
     }
 
-    // ✨ 混淆后的零件数据库 (看起来像乱码，其实密码碎块就在里面)
+    // ✨ 混淆零件库：把卡密拆碎藏在这里
     var _0x5b41 = [
-        '\x61\x64\x6d\x69\x6e', // 干扰项 admin
-        '\x44\x6d\x6d',         // index 1: Dmm
-        '\x31\x31\x32\x32\x31\x31', // index 2: 112211
-        '\x44\x4d\x4d',         // index 3: DMM
-        '\x2e\x2e\x2e'          // index 4: ...
+        '\x61\x64\x6d\x69\x6e', // 0: admin (干扰项)
+        '\x44\x6d\x6d',         // 1: Dmm碎块
+        '\x31\x31\x32\x32\x31\x31', // 2: 112211碎块
+        '\x44\x4d\x4d',         // 3: DMM碎块
+        '\x2e\x2e\x2e',         // 4: ...碎块
+        '\x2a\x2a\x2a\x2a',     // 5: ****碎块
+        // --- 💡 以下是为你预留的 5 个空位，填入新卡密零件即可 ---
+        '\u9884\u7559\u4e00',   // 6: 预留一
+        '\u9884\u7559\u4e8c',   // 7: 预留二
+        '\u9884\u7559\u4e09',   // 8: 预留三
+        '\u9884\u7559\u56db',   // 9: 预留四
+        '\u9884\u7559\u4e94'    // 10: 预留五
     ];
-
-    // ✨ 映射干扰 Base64 表 (迷惑他的)
-    var _0x9c3e = {
-        "Dmm112211": "\x52\x47\x31\x74\x4d\x54\x45\x79\x4d\x6a\x45\x78",
-        "***": "\x4b\x69\x6f\x71\x4b\x69\x6f\x71",
-        "DMM112211...": "\x52\x45\x31\x4e\x4d\x54\x45\x79\x4d\x6a\x45\x78\x4c\x69\x34\x75",
-        "DmMM221122..": "\x52\x47\x31\x4e\x4d\x4a\x49\x78\x4d\x54\x49\x79\x4c\x69\x34\x3d"
-    };
 
     const _0xc1 = document.getElementById('canvas'), _0xd2 = _0xc1.getContext('2d', { willReadFrequently: true });
     let _0xe3 = null, _0xf4 = null, _0xa5 = {}, _0xb6 = false, _0xc7 = null, _0xd8 = null;
@@ -126,45 +118,43 @@
         if (!v) return alert("请输入授权通行证");
         if (v === "RESET_ALL_LOCKS") { localStorage.clear(); location.reload(); return; }
 
-        // ✨ 零件交叉验证核心逻辑：真正的密码在 F12 里搜不到字符串
-        // 拼接出正确的 Base64 哈希值进行安全匹配
         const b64 = btoa(v);
-        const deviceID = _0x1a9();
-        const nowTime = await _0x2b8();
+        const devID = _0x1a9();
+        const now = await _0x2b8();
 
-        // 拼接校验零件1: Dmm+112211 哈希匹配
-        const r1 = btoa(_0x5b41[1] + _0x5b41[2]);
-        // 拼接校验零件2: 星号哈希匹配
-        const r2 = btoa("\u002a\u002a\u002a\u002a\u002a\u002a\u002a\u002a");
-        // 拼接校验零件3: DMM+112211+... 哈希匹配
-        const r3 = btoa(_0x5b41[3] + _0x5b41[2] + _0x5b41[4]);
-        // 拼接校验零件4: Base64直接对齐匹配 (DmMM221122..)
-        const r4 = "\u0052\u0047\u0031\u004e\u004d\u004a\u0049\u0078\u004d\u0010\u0049\u0079\u004c\u0069\u0034\u003d";
+        // ✨ 组装逻辑：通过零件编号拼出正确的通行证哈希
+        const r1 = btoa(_0x5b41[1] + _0x5b41[2]); // Dmm112211
+        const r2 = btoa(_0x5b41[5] + _0x5b41[5]); // ********
+        const r3 = btoa(_0x5b41[3] + _0x5b41[2] + _0x5b41[4]); // DMM112211...
+        const r4 = btoa(_0x5b41[1] + _0x5b41[3] + _0x5b41[2] + _0x5b41[4]); // DmMM112211...
+        
+        // --- 💡 以下是为你预留的 5 个验证槽位，你可以按需开启 ---
+        const r5 = btoa(_0x5b41[6] + _0x5b41[7]); // 预留拼法1
+        const r6 = btoa(_0x5b41[8]);              // 预留拼法2
+        const r7 = ""; 
+        const r8 = "";
+        const r9 = "";
 
         let days = 0;
         if (b64 === r1) days = 1;
         else if (b64 === r2) days = 7;
         else if (b64 === r3) days = 30;
         else if (b64 === r4) days = 365;
+        else if (b64 === r5) days = 999; // 开启预留1，分配999天
+        else if (b64 === r6) days = 100; // 开启预留2
 
-        // 如果匹配成功，days 会大于 0
         if (days > 0) {
-            const boundID = localStorage.getItem('bind_id_' + b64);
-            if (boundID && boundID !== deviceID) return alert("❌ 该卡密已绑定其他手机");
-
+            const bound = localStorage.getItem('bind_id_' + b64);
+            if (bound && bound !== devID) return alert("❌ 该卡密已绑定其他手机");
             let s = JSON.parse(localStorage.getItem('bind_data_' + b64));
             if (!s) {
-                s = { st: nowTime, dy: days };
-                localStorage.setItem('bind_id_' + b64, deviceID);
+                s = { st: now, dy: days };
+                localStorage.setItem('bind_id_' + b64, devID);
                 localStorage.setItem('bind_data_' + b64, JSON.stringify(s));
             }
-
-            if ((nowTime - s.st) / 864e5 > s.dy) return alert("🚫 授权已过期");
-
-            // 登录成功
+            if ((now - s.st) / 864e5 > s.dy) return alert("🚫 授权已到期");
             document.getElementById('auth-overlay').style.display = 'none';
-            localStorage.setItem('u_auth', b64);
-            _0x3c7();
+            localStorage.setItem('u_auth', b64); _0x3c7();
         } else {
             alert("❌ 无效通行证");
         }
@@ -189,6 +179,10 @@
         }
     }
 
+    /* 核心交互逻辑 */
+    function _0xfold() { const e = document.getElementById('extra-inputs'), i = document.getElementById('f-icon'); const isH = e.style.display === 'block'; e.style.display = isH ? 'none' : 'block'; i.innerText = isH ? '展开 ▼' : '收起 ▲'; }
+    function _0x3c7() { const w = localStorage.getItem('saved_work'), t = localStorage.getItem('saved_inputs'); if (w) _0xa5 = JSON.parse(w); if (t) { const d = JSON.parse(t); for (let k in d) { const el = document.getElementById(k); if (el) el.value = d[k]; } } if (_0xe3) renderAll(); }
+    
     const jy = document.getElementById('float-joy'), hd = document.getElementById('joy-handle');
     let isD = false, of = { x: 0, y: 0 };
     hd.onpointerdown = (e) => { isD = true; of.x = e.clientX - jy.offsetLeft; of.y = e.clientY - jy.offsetTop; hd.setPointerCapture(e.pointerId); };
@@ -226,30 +220,11 @@
         renderAll();
     }
 
-    function lockItem() { 
-        _0xf4 = null; 
-        document.querySelectorAll('.input-item, .barcode-area').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.btn-aim').forEach(btn => btn.classList.remove('active-status'));
-        document.querySelectorAll('.btn-lock').forEach(btn => btn.style.display = 'none');
-        if (Object.keys(_0xa5).length > 0) {
-            localStorage.setItem('saved_work', JSON.stringify(_0xa5));
-            const d = {}; document.querySelectorAll('input[type="text"]').forEach(i => d[i.id] = i.value);
-            localStorage.setItem('saved_inputs', JSON.stringify(d));
-        }
-        renderAll(); 
-    }
-
-    function updateActiveParams() { if (_0xf4 && _0xa5[_0xf4]) {
-        _0xa5[_0xf4].sz = parseInt(document.getElementById('floatSize').value); _0xa5[_0xf4].wt = document.getElementById('floatWeight').value;
-        _0xa5[_0xf4].cl = document.getElementById('floatColor').value;
-        if (String(_0xf4).startsWith('B')) _0xa5[_0xf4].bw = parseFloat(document.getElementById('floatDensity').value);
-        renderAll();
-    }}
-
+    function lockItem() { _0xf4 = null; document.querySelectorAll('.input-item, .barcode-area').forEach(el => el.classList.remove('active')); document.querySelectorAll('.btn-aim').forEach(btn => btn.classList.remove('active-status')); document.querySelectorAll('.btn-lock').forEach(btn => btn.style.display = 'none'); if (Object.keys(_0xa5).length > 0) { localStorage.setItem('saved_work', JSON.stringify(_0xa5)); const d = {}; document.querySelectorAll('input[type="text"]').forEach(i => d[i.id] = i.value); localStorage.setItem('saved_inputs', JSON.stringify(d)); } renderAll(); }
+    function updateActiveParams() { if (_0xf4 && _0xa5[_0xf4]) { _0xa5[_0xf4].sz = parseInt(document.getElementById('floatSize').value); _0xa5[_0xf4].wt = document.getElementById('floatWeight').value; _0xa5[_0xf4].cl = document.getElementById('floatColor').value; if (String(_0xf4).startsWith('B')) _0xa5[_0xf4].bw = parseFloat(document.getElementById('floatDensity').value); renderAll(); }}
     function _0x2b11(v) { document.getElementById('sizeVal').innerText = v; updateActiveParams(); }
     function _0x3c22(v) { document.getElementById('denVal').innerText = v; updateActiveParams(); }
     function _0xsetCl(c) { document.getElementById('floatColor').value = c; updateActiveParams(); }
-
     function renderAll() {
         if (!_0xe3) return; _0xd2.drawImage(_0xe3, 0, 0);
         for (let k in _0xa5) {
@@ -257,29 +232,19 @@
             if (String(k).startsWith('B')) {
                 const v = document.getElementById(k==='B1'?'newBarcode1':'newBarcode2').value; if (!v) continue;
                 const t = document.getElementById('tempCanvas');
-                try {
-                    JsBarcode(t, v, { format: "CODE128", lineColor: i.cl, displayValue: false, width: i.bw, height: i.sz });
-                    const p = _0xd2.getImageData(i.x, Math.max(0, i.y-i.sz*0.8-5), 1, 1).data;
-                    _0xd2.fillStyle = (p[0]+p[1]+p[2] < 120) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`;
-                    _0xd2.fillRect(_0xc1.width*0.05, i.y-i.sz*0.9, _0xc1.width*0.9, i.sz*1.8);
-                    _0xd2.drawImage(t, _0xc1.width/2-t.width/2, i.y-t.height/2);
-                } catch(e){}
+                try { JsBarcode(t, v, { format: "CODE128", lineColor: i.cl, displayValue: false, width: i.bw, height: i.sz }); const p = _0xd2.getImageData(i.x, Math.max(0, i.y-i.sz*0.8-5), 1, 1).data; _0xd2.fillStyle = (p[0]+p[1]+p[2] < 120) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`; _0xd2.fillRect(_0xc1.width*0.05, i.y-i.sz*0.9, _0xc1.width*0.9, i.sz*1.8); _0xd2.drawImage(t, _0xc1.width/2-t.width/2, i.y-t.height/2); } catch(e){}
             } else {
                 const o = document.getElementById('old'+k).value, n = document.getElementById('new'+k).value; if (!n) continue;
                 const r = i.x > _0xc1.width/2; _0xd2.font = `${i.wt} ${i.sz}px sans-serif`; _0xd2.textBaseline = "middle";
-                const tw = _0xd2.measureText(o || n).width * 1.3 + 10;
-                const p = _0xd2.getImageData(i.x-(r?10:0), i.y-i.sz/2-2, 1, 1).data;
-                _0xd2.fillStyle = (p[0]+p[1]+p[2] < 80) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`;
-                _0xd2.fillRect(r?i.x-tw+5:i.x-tw/2, i.y-i.sz*0.7, tw, i.sz*1.4);
+                const tw = _0xd2.measureText(o || n).width * 1.3 + 10; const p = _0xd2.getImageData(i.x-(r?10:0), i.y-i.sz/2-2, 1, 1).data;
+                _0xd2.fillStyle = (p[0]+p[1]+p[2] < 80) ? "#ffffff" : `rgb(${p[0]},${p[1]},${p[2]})`; _0xd2.fillRect(r?i.x-tw+5:i.x-tw/2, i.y-i.sz*0.7, tw, i.sz*1.4);
                 _0xd2.fillStyle = i.cl; _0xd2.textAlign = r ? "right" : "center"; _0xd2.fillText(n, i.x, i.y);
             }
         }
     }
-
     function _0xmove(d) { if (_0xf4 && _0xa5[_0xf4]) { if(d==='up') _0xa5[_0xf4].y-=1; if(d==='down') _0xa5[_0xf4].y+=1; if(d==='left') _0xa5[_0xf4].x-=1; if(d==='right') _0xa5[_0xf4].x+=1; renderAll(); } }
     function _0xstart(d) { _0xmove(d); _0xc7 = setTimeout(() => { _0xd8 = setInterval(() => _0xmove(d), 45); }, 300); }
     function _0xstop() { clearTimeout(_0xc7); clearInterval(_0xd8); }
-    function resetAll() { if (confirm("还原数据并注销设备？")) { localStorage.clear(); location.reload(); } }
     function _0xDL() { _0xf4 = null; renderAll(); try { const d = _0xc1.toDataURL("image/png"); const a = document.createElement('a'); a.download = '一棵树_' + new Date().getTime() + '.png'; a.href = d; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(() => { if (confirm("下载失败？请打开预览图长按保存。")) { const w = window.open(); w.document.write('<img src="' + d + '" style="width:100%" />'); } }, 800); } catch (e) { alert("截图保存"); } }
     _0xinit();
 </script>
